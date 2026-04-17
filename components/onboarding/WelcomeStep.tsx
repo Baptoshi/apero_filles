@@ -3,19 +3,17 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 import { Button } from '@/components/ui/Button';
 import { Colors } from '@/constants/colors';
 import { Spacing } from '@/constants/spacing';
-import { Typography } from '@/constants/typography';
+import { FontFamily, Typography } from '@/constants/typography';
 
 interface WelcomeStepProps {
   onNext: () => void;
 }
 
 /**
- * Onboarding welcome — full-screen brand logo + Apple-like pill CTA.
+ * Onboarding welcome — logo + editorial tagline + Apple-style CTA.
  *
- * The logo is loaded from `assets/images/logo.png` and rendered with
- * `resizeMode="contain"` so the image always sits cleanly within the screen
- * regardless of device aspect ratio. A soft cream background keeps the
- * composition warm even before the image paints in.
+ * Tagline plays with Playfair italic accents on a couple of words so the
+ * page feels warm and editorial without being loud.
  */
 export function WelcomeStep({ onNext }: WelcomeStepProps) {
   return (
@@ -27,6 +25,17 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
           resizeMode="contain"
           accessibilityLabel="Les Apéros Filles"
         />
+      </View>
+
+      <View style={styles.taglineWrap}>
+        <Text style={styles.tagline}>
+          Ta bande de <Text style={styles.taglineAccent}>copines</Text>,{'\n'}
+          près de chez toi.
+        </Text>
+        <Text style={styles.description}>
+          Des apéros, du sport, des ateliers, des talks —{' '}
+          <Text style={styles.descriptionAccent}>entre filles</Text>, dans 5 villes.
+        </Text>
       </View>
 
       <View style={styles.footer}>
@@ -56,13 +65,40 @@ const styles = StyleSheet.create({
   logo: {
     width: '100%',
     height: '100%',
-    maxWidth: 520,
-    maxHeight: 520,
+    maxWidth: 360,
+    maxHeight: 360,
+  },
+  taglineWrap: {
+    paddingHorizontal: Spacing.xxl,
+    gap: Spacing.md,
+  },
+  tagline: {
+    fontFamily: FontFamily.display,
+    fontSize: 34,
+    lineHeight: 40,
+    color: Colors.text,
+    letterSpacing: -0.4,
+    textAlign: 'center',
+  },
+  taglineAccent: {
+    fontStyle: 'italic',
+    color: Colors.accent,
+  },
+  description: {
+    ...Typography.body,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  descriptionAccent: {
+    fontStyle: 'italic',
+    color: Colors.accent,
   },
   footer: {
     paddingHorizontal: Spacing.xl,
     paddingBottom: Spacing.xxxl,
-    paddingTop: Spacing.xl,
+    paddingTop: Spacing.xxl,
     alignItems: 'center',
     gap: Spacing.md,
   },
