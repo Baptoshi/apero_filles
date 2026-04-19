@@ -14,37 +14,46 @@ import { useAuthStore } from '@/stores/useAuthStore';
 
 interface Plan {
   id: '1m' | '3m' | '6m';
-  duration: string;
+  name: string;
+  promise: string;
   priceMonthly: string;
   total: string | null;
   saving: string | null;
   highlight: boolean;
 }
 
+/**
+ * Three named tiers, one for each moment of the journey — discover, meet,
+ * build. Prices align with the proposal (§ 3 bis of
+ * `docs/proposition-marguerite.md`).
+ */
 const plans: Plan[] = [
   {
     id: '1m',
-    duration: '1 mois',
-    priceMonthly: '14,99€/mois',
+    name: 'L\'Étincelle ✨',
+    promise: 'Pour découvrir le concept',
+    priceMonthly: '18,90 € / mois',
     total: null,
     saving: 'Sans engagement',
     highlight: false,
   },
   {
     id: '3m',
-    duration: '3 mois',
-    priceMonthly: '11,99€/mois',
-    total: 'Soit 35,97€',
-    saving: 'Économise 20%',
-    highlight: true,
+    name: 'Le Lien 🧡',
+    promise: 'Pour rencontrer ta prochaine acolyte',
+    priceMonthly: '15,50 € / mois',
+    total: '46,50 € tous les 3 mois',
+    saving: 'Économise 18 %',
+    highlight: false,
   },
   {
     id: '6m',
-    duration: '6 mois',
-    priceMonthly: '9,99€/mois',
-    total: 'Soit 59,94€',
-    saving: 'Économise 33%',
-    highlight: false,
+    name: 'La Bande 👯',
+    promise: 'Pour te constituer ton gang de copines',
+    priceMonthly: '12,50 € / mois',
+    total: '75 € tous les 6 mois',
+    saving: 'Économise 34 %',
+    highlight: true,
   },
 ];
 
@@ -111,7 +120,7 @@ export default function SubscribeScreen() {
 
       <View style={styles.footer}>
         <Button
-          label={`Choisir ${plans.find((p) => p.id === selected)?.duration ?? ''}`}
+          label={`Choisir ${plans.find((p) => p.id === selected)?.name ?? ''}`}
           onPress={subscribe}
           accessibilityLabel="Valider le choix d'abonnement"
         />
@@ -143,7 +152,7 @@ function PlanCard({ plan, selected, onPress }: PlanCardProps) {
         scale.value = withSpring(1, { damping: 10, stiffness: 180 });
       }}
       accessibilityRole="button"
-      accessibilityLabel={`Abonnement ${plan.duration}`}
+      accessibilityLabel={`Abonnement ${plan.name}`}
       accessibilityState={{ selected }}
       style={[
         styles.planCard,
@@ -153,10 +162,11 @@ function PlanCard({ plan, selected, onPress }: PlanCardProps) {
     >
       {plan.highlight ? (
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>Populaire</Text>
+          <Text style={styles.badgeText}>Le plus choisi</Text>
         </View>
       ) : null}
-      <Text style={styles.planDuration}>{plan.duration}</Text>
+      <Text style={styles.planName}>{plan.name}</Text>
+      <Text style={styles.planPromise}>{plan.promise}</Text>
       <Text style={styles.planPrice}>{plan.priceMonthly}</Text>
       {plan.total ? <Text style={styles.planTotal}>{plan.total}</Text> : null}
       {plan.saving ? <Text style={styles.planSaving}>{plan.saving}</Text> : null}
@@ -225,10 +235,15 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
-  planDuration: {
+  planName: {
     ...Typography.h3,
     color: Colors.darkBrown,
-    marginBottom: Spacing.xs,
+    marginBottom: 2,
+  },
+  planPromise: {
+    ...Typography.caption,
+    color: Colors.brown,
+    marginBottom: Spacing.sm,
   },
   planPrice: {
     ...Typography.bodyBold,

@@ -27,10 +27,15 @@ const tierDescriptions: Record<MembershipTier, string> = {
   faithful: 'Plus de 6 mois avec nous. Merci d’être là.',
 };
 
+/**
+ * Average monthly cost shown as the recurring amount. Tied to the "La Bande"
+ * formula by default (best value, most chosen) — a real integration would
+ * read this from the active Stripe subscription.
+ */
 const tierPrices: Record<MembershipTier, string> = {
   free: '0 €',
-  member: '9,99 €',
-  faithful: '9,99 €',
+  member: '12,50 €',
+  faithful: '12,50 €',
 };
 
 /** Next billing = today + 1 month, formatted in long French. */

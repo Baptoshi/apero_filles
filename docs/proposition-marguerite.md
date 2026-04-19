@@ -206,19 +206,20 @@ en lui donnant envie de passer payante.
 - Pas de priorité sur les events populaires.
 - Pas d'events privés / exclusifs.
 
-### Les formules payantes — Membre du club
+### Les formules payantes — trois portes d'entrée au club
 
-Même périmètre de fonctionnalités quel que soit l'engagement, seul le prix
-au mois change selon la durée.
+Trois formules nommées comme trois moments d'une même histoire :
+découvrir, rencontrer, s'entourer. Même périmètre de fonctionnalités dans
+les trois cas — seule la durée d'engagement et le prix au mois changent.
 
-| Formule | Prix total | Prix / mois | Économie |
-|---|---|---|---|
-| **Mensuel** (sans engagement) | 9,99 € | 9,99 € | — |
-| **3 mois** | 24,99 € | 8,33 € | −17 % |
-| **6 mois** | 39,99 € | 6,66 € | −33 % |
+| Formule | Promesse | Durée | Prix / mois | Facturation | Économie |
+|---|---|---|---|---|---|
+| **L'Étincelle ✨** | Pour découvrir le concept | 1 mois | 18,90 € | 18,90 € / mois | — |
+| **Le Lien 🧡** | Pour rencontrer ta prochaine acolyte | 3 mois | 15,50 € | **46,50 € tous les 3 mois** | **−18 %** |
+| **La Bande 👯** | Pour te constituer ton gang de copines | 6 mois | 12,50 € | **75 € tous les 6 mois** | **−34 %** |
 
-Encaissement **en une fois** pour les formules 3 et 6 mois (trésorerie
-immédiate pour toi, meilleur deal pour la fille).
+Encaissement **en une fois** pour Le Lien et La Bande (trésorerie
+immédiate pour ta société, meilleur deal au mois pour la fille).
 
 **Ce que déverrouille n'importe quelle formule payante** :
 
@@ -249,7 +250,7 @@ crée une mécanique d'aspiration saine pour les nouvelles inscrites.
 
 ### Tableau comparatif rapide
 
-| | **Découverte** (0 €) | **Club** (à partir de 6,66 €/mois) | **Fidèle** (après 6 mois) |
+| | **Découverte** (0 €) | **Club** (à partir de 12,50 €/mois) | **Fidèle** (après 6 mois) |
 |---|---|---|---|
 | Navigation, discover, feed reco | ✅ | ✅ | ✅ |
 | Bookmarks, favoris | ✅ | ✅ | ✅ |
@@ -265,12 +266,14 @@ crée une mécanique d'aspiration saine pour les nouvelles inscrites.
 
 ### Dans l'app, concrètement
 
-- Les **trois formules** s'affichent ensemble sur l'écran `/subscribe`, avec
-  la 6 mois mise en avant ("le plus choisi", économie soulignée).
-- La **résiliation** est possible en un clic depuis le profil (on n'est pas
-  là pour retenir les filles contre leur gré — ça protège la marque).
-- Les relances de fin d'engagement 3/6 mois sont gérées automatiquement
-  via **Brevo** (email J-7, J-2, J-0 avec proposition de renouvellement).
+- Les **trois formules** s'affichent ensemble sur l'écran d'abonnement,
+  avec **La Bande** mise en avant ("le plus choisi", économie −34 %
+  soulignée).
+- La **résiliation** est possible en un clic depuis le profil (on n'est
+  pas là pour retenir les filles contre leur gré — ça protège la marque).
+- Les relances de fin d'engagement pour Le Lien et La Bande sont gérées
+  automatiquement via **Brevo** (email J-7, J-2, J-0 avec proposition de
+  renouvellement).
 
 ---
 

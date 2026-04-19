@@ -31,12 +31,10 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
       <Video
         ref={videoRef}
         source={require('../../assets/videos/onboarding.mp4')}
-        // `absoluteFill` + CONTAIN shows the full video ; the scale pulls it
-        // back a touch so the content feels less tight while the layout still
-        // reads as full-screen (the root's black background + gradient cover
-        // the small inset that appears around the video).
-        style={[StyleSheet.absoluteFill, styles.video]}
-        resizeMode={ResizeMode.CONTAIN}
+        // True full-screen : COVER fills the entire frame, cropping the sides
+        // if the aspect ratio doesn't match. No letterbox, no black bars.
+        style={StyleSheet.absoluteFill}
+        resizeMode={ResizeMode.COVER}
         isLooping
         shouldPlay
         isMuted
@@ -97,11 +95,6 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: Colors.black,
-  },
-  video: {
-    // Pulls the video back so the framing feels less tight without losing
-    // the full-screen feel (the root's black background fills the inset).
-    transform: [{ scale: 0.78 }],
   },
   safe: {
     flex: 1,
