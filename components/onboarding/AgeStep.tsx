@@ -36,7 +36,6 @@ export function AgeStep({ onNext, onBack }: AgeStepProps) {
       <View style={styles.header}>
         <Text style={styles.step}>Étape 4 sur 5</Text>
         <Text style={styles.title}>Ta tranche d'âge ?</Text>
-        <Text style={styles.subtitle}>Ça nous aide à te suggérer les bons événements.</Text>
       </View>
       <FlatList
         data={ageRanges}

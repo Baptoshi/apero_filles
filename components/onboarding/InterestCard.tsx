@@ -3,11 +3,10 @@ import { ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native
 
 import { Colors } from '@/constants/colors';
 import { IconSize, Radius, Spacing } from '@/constants/spacing';
-import { FontFamily, Typography } from '@/constants/typography';
+import { FontFamily } from '@/constants/typography';
 
 interface InterestCardProps {
   label: string;
-  caption: string;
   photoUrl?: string;
   selected: boolean;
   onPress: () => void;
@@ -16,16 +15,15 @@ interface InterestCardProps {
 /**
  * Big editorial card for the onboarding interests step.
  *
- * Photo-led: a square-ish image fills the top of the card, the interest name
- * sits on top in white Playfair italic, and a short caption lives under the
- * image on the cream footer. A check badge appears in the top-right corner
- * when the card is selected — the only color change besides the ring.
+ * Photo-led: a square image fills the card, the interest name sits over a
+ * soft brown wash in white Playfair italic, and a check badge appears in
+ * the top-right corner when selected. No text caption — the photo carries
+ * the meaning.
  *
  * Designed to be used in a 2-column grid inside a FlatList.
  */
 export function InterestCard({
   label,
-  caption,
   photoUrl,
   selected,
   onPress,
@@ -64,12 +62,6 @@ export function InterestCard({
 
         <Text style={styles.label}>{label}</Text>
       </ImageBackground>
-
-      <View style={styles.footer}>
-        <Text style={styles.caption} numberOfLines={2}>
-          {caption}
-        </Text>
-      </View>
     </Pressable>
   );
 }
@@ -100,8 +92,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   photoImage: {
-    // The border-radius of the card takes care of rounding; this keeps the
-    // image from bleeding past the bottom edge of the photo slot.
+    // The border-radius of the card takes care of rounding ; this keeps
+    // the image from bleeding past the rounded corners.
   },
   photoOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -134,14 +126,5 @@ const styles = StyleSheet.create({
     lineHeight: 26,
     letterSpacing: -0.3,
     color: Colors.accentContrast,
-  },
-  footer: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
-    minHeight: 56,
-  },
-  caption: {
-    ...Typography.caption,
-    color: Colors.textSecondary,
   },
 });

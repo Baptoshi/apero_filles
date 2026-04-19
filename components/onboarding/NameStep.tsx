@@ -60,10 +60,6 @@ export function NameStep({ onNext, onBack }: NameStepProps) {
           <Text style={styles.title}>
             On t'appelle <Text style={styles.titleAccent}>comment</Text> ?
           </Text>
-          <Text style={styles.subtitle}>
-            Seul ton prénom apparaîtra publiquement. Le reste, c'est toi qui
-            choisis ce qu'on affiche — tu pourras tout modifier plus tard.
-          </Text>
         </View>
 
         <View style={styles.body}>

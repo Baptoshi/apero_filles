@@ -84,11 +84,17 @@ function FeedCardComponent({
               <FomoPill badge={fomo} />
             </View>
           ) : null}
+
+          <View style={styles.categoryChip} pointerEvents="none">
+            <Text style={styles.categoryLabel} numberOfLines={1}>
+              {event.category}
+            </Text>
+          </View>
         </View>
 
         <View style={styles.body}>
           <Text style={styles.eyebrow}>
-            {event.category.toUpperCase()} · {pieces.day} {pieces.month.toUpperCase()} · {event.time}
+            {pieces.day} {pieces.month.toUpperCase()} · {event.time}
           </Text>
 
           <Text style={styles.title} numberOfLines={2}>
@@ -200,6 +206,22 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     alignItems: 'center',
+  },
+  categoryChip: {
+    position: 'absolute',
+    bottom: Spacing.md,
+    right: Spacing.md,
+    paddingVertical: 5,
+    paddingHorizontal: Spacing.sm + 2,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.accent,
+    maxWidth: '70%',
+  },
+  categoryLabel: {
+    ...Typography.small,
+    color: Colors.accentContrast,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
   },
   likeAbs: {
     position: 'absolute',

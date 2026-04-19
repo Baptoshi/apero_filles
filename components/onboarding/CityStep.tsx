@@ -31,7 +31,6 @@ export function CityStep({ onNext, onBack }: CityStepProps) {
       <View style={styles.header}>
         <Text style={styles.step}>Étape 3 sur 5</Text>
         <Text style={styles.title}>Tu es à quelle ville ?</Text>
-        <Text style={styles.subtitle}>Pour te proposer les événements près de chez toi.</Text>
       </View>
       <FlatList
         data={cities}

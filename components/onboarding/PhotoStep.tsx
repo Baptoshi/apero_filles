@@ -66,10 +66,6 @@ export function PhotoStep({ onNext, onBack }: PhotoStepProps) {
         <Text style={styles.title}>
           Une <Text style={styles.titleAccent}>photo</Text> de toi ?
         </Text>
-        <Text style={styles.subtitle}>
-          Facultatif, mais ça aide les autres filles à te reconnaître en vrai
-          le jour de l'événement.
-        </Text>
       </View>
 
       <View style={styles.previewWrap}>

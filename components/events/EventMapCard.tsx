@@ -1,28 +1,65 @@
 import { MapPin } from 'lucide-react-native';
-import { useState } from 'react';
-import { Platform, Pressable, StyleSheet, View } from 'react-native';
-import Svg, { Circle, Line, Rect } from 'react-native-svg';
+import { useMemo, useState } from 'react';
+import {
+  Image,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 import { MapsPicker } from '@/components/events/MapsPicker';
 import { Colors } from '@/constants/colors';
-import { IconSize, Radius } from '@/constants/spacing';
+import { Radius, Spacing } from '@/constants/spacing';
+import { Typography } from '@/constants/typography';
+import type { City } from '@/types/user';
+import { deriveEventCoords, staticMapUrl } from '@/utils/geo';
 import { detectIosMapApps, openMaps, type MapApp } from '@/utils/maps';
 
 interface EventMapCardProps {
+  /** Event id used to derive a stable per-event coordinate. */
+  eventId: string;
   location: string;
-  city: string;
+  city: City;
+  /** Optional explicit coordinates. Overrides the city-centre fallback. */
+  coords?: { lat: number; lng: number };
 }
 
 /**
- * Minimal map card — clean grid, one pin.
+ * Airbnb-style map preview backed by a real street map.
  *
- * No curved streets, no park blocks, no fioriture. Just a warm neutral
- * canvas with a faint orthogonal grid suggesting a real city plan and a
- * terracotta pin in the middle. Tap → native maps.
+ * We fetch a static PNG from `staticmap.openstreetmap.de` (free, no API
+ * key required) for the event's coordinates and overlay our own pin on
+ * top in React Native — that way the marker stays on-brand and we never
+ * depend on the static service's marker styling.
+ *
+ * If the network image fails (offline / service down), a soft warm
+ * placeholder kicks in so the layout never collapses.
+ *
+ * Tap → opens the user's preferred maps app (system picker on iOS when
+ * multiple apps are installed, geo: intent on Android, Google Maps web
+ * fallback on the browser).
  */
-export function EventMapCard({ location, city }: EventMapCardProps) {
+export function EventMapCard({
+  eventId,
+  location,
+  city,
+  coords,
+}: EventMapCardProps) {
   const [pickerVisible, setPickerVisible] = useState(false);
   const [iosApps, setIosApps] = useState<MapApp[]>([]);
+  const [imageFailed, setImageFailed] = useState(false);
+
+  const finalCoords = useMemo(
+    () => coords ?? deriveEventCoords(eventId, city),
+    [coords, eventId, city],
+  );
+
+  const mapImageUrl = useMemo(
+    () => staticMapUrl(finalCoords, { zoom: 15, width: 720, height: 400 }),
+    [finalCoords],
+  );
 
   const onPress = async () => {
     if (Platform.OS === 'ios') {
@@ -51,39 +88,41 @@ export function EventMapCard({ location, city }: EventMapCardProps) {
         style={({ pressed }) => [styles.card, pressed && styles.pressed]}
       >
         <View style={styles.mapWrap}>
-          <Svg
-            viewBox="0 0 640 280"
-            width="100%"
-            height="100%"
-            preserveAspectRatio="xMidYMid slice"
-          >
-            {/* Canvas */}
-            <Rect x="0" y="0" width="640" height="280" fill="#F3EADB" />
+          {imageFailed ? (
+            <View style={styles.fallback}>
+              <Text style={styles.fallbackTitle}>{location}</Text>
+              <Text style={styles.fallbackSub}>{city}</Text>
+            </View>
+          ) : (
+            <Image
+              source={{ uri: mapImageUrl }}
+              style={styles.mapImage}
+              resizeMode="cover"
+              onError={() => setImageFailed(true)}
+              accessibilityIgnoresInvertColors
+            />
+          )}
 
-            {/* Horizontal streets — thin hairlines in a brighter cream */}
-            <Line x1="0" y1="70" x2="640" y2="70" stroke="#FDF6EA" strokeWidth="14" />
-            <Line x1="0" y1="140" x2="640" y2="140" stroke="#FDF6EA" strokeWidth="18" />
-            <Line x1="0" y1="210" x2="640" y2="210" stroke="#FDF6EA" strokeWidth="14" />
-
-            {/* Vertical streets */}
-            <Line x1="120" y1="0" x2="120" y2="280" stroke="#FDF6EA" strokeWidth="12" />
-            <Line x1="260" y1="0" x2="260" y2="280" stroke="#FDF6EA" strokeWidth="12" />
-            <Line x1="400" y1="0" x2="400" y2="280" stroke="#FDF6EA" strokeWidth="14" />
-            <Line x1="540" y1="0" x2="540" y2="280" stroke="#FDF6EA" strokeWidth="12" />
-
-            {/* Drop shadow circle under the pin */}
-            <Circle cx="320" cy="148" r="14" fill="rgba(42, 24, 16, 0.14)" />
-          </Svg>
-
+          {/* Airbnb-style pin — white pill with terracotta dot, centred. */}
           <View style={styles.pinLayer} pointerEvents="none">
             <View style={styles.pin}>
-              <MapPin
-                size={IconSize.inline}
-                color={Colors.accentContrast}
-                fill={Colors.accentContrast}
-                strokeWidth={0}
-              />
+              <View style={styles.pinDot}>
+                <MapPin
+                  size={12}
+                  color={Colors.accentContrast}
+                  fill={Colors.accentContrast}
+                  strokeWidth={0}
+                />
+              </View>
+              <Text style={styles.pinLabel} numberOfLines={1}>
+                {location}
+              </Text>
             </View>
+          </View>
+
+          {/* "Voir sur la carte →" affordance — bottom-right Airbnb cue. */}
+          <View style={styles.cta} pointerEvents="none">
+            <Text style={styles.ctaLabel}>Voir sur la carte →</Text>
           </View>
         </View>
       </Pressable>
@@ -99,8 +138,6 @@ export function EventMapCard({ location, city }: EventMapCardProps) {
   );
 }
 
-const PIN_SIZE = 28;
-
 const styles = StyleSheet.create({
   card: {
     borderRadius: Radius.lg,
@@ -110,13 +147,34 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
   },
   pressed: {
-    opacity: 0.9,
+    opacity: 0.92,
   },
   mapWrap: {
-    aspectRatio: 16 / 7,
+    aspectRatio: 16 / 9,
     position: 'relative',
     overflow: 'hidden',
     backgroundColor: Colors.backgroundMuted,
+  },
+  mapImage: {
+    width: '100%',
+    height: '100%',
+  },
+  fallback: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.lg,
+    backgroundColor: Colors.surfaceMuted,
+  },
+  fallbackTitle: {
+    ...Typography.bodyBold,
+    color: Colors.text,
+    textAlign: 'center',
+  },
+  fallbackSub: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+    marginTop: 2,
   },
   pinLayer: {
     ...StyleSheet.absoluteFillObject,
@@ -124,18 +182,46 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   pin: {
-    width: PIN_SIZE,
-    height: PIN_SIZE,
-    borderRadius: PIN_SIZE / 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 6,
+    paddingLeft: 6,
+    paddingRight: 12,
+    borderRadius: 999,
+    backgroundColor: Colors.surface,
+    maxWidth: '85%',
+    shadowColor: Colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.22,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  pinDot: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     backgroundColor: Colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: Colors.surface,
-    shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.18,
-    shadowRadius: 6,
-    elevation: 3,
+  },
+  pinLabel: {
+    ...Typography.small,
+    fontSize: 12,
+    color: Colors.text,
+    flexShrink: 1,
+  },
+  cta: {
+    position: 'absolute',
+    bottom: Spacing.sm,
+    right: Spacing.sm,
+    paddingHorizontal: Spacing.sm + 2,
+    paddingVertical: 4,
+    borderRadius: Radius.full,
+    backgroundColor: 'rgba(251, 246, 238, 0.95)',
+  },
+  ctaLabel: {
+    ...Typography.small,
+    color: Colors.text,
   },
 });

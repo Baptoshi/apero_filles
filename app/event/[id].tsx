@@ -282,7 +282,11 @@ function EventDetail({ event }: { event: Event }) {
               </View>
             </View>
             <View style={styles.mapWrap}>
-              <EventMapCard location={event.location} city={event.city} />
+              <EventMapCard
+                eventId={event.id}
+                location={event.location}
+                city={event.city}
+              />
             </View>
           </Section>
 

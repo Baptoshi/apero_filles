@@ -10,23 +10,14 @@ import type { Interest } from '@/types/user';
 
 import { InterestCard } from './InterestCard';
 
-interface InterestOption {
-  value: Interest;
-  caption: string;
-}
-
-/**
- * One-line captions rather than long pitches — feels like a curated magazine
- * rubric and fits under the photo without wrapping past two lines.
- */
-const interests: readonly InterestOption[] = [
-  { value: 'Apéro', caption: 'Verre entre copines, avec ou sans prétexte.' },
-  { value: 'Sport', caption: 'Bouger, transpirer, rigoler ensemble.' },
-  { value: 'Atelier créatif', caption: 'Céramique, couture, peinture — les mains occupées.' },
-  { value: 'Talk', caption: 'Écouter des femmes qui ont des choses à dire.' },
-  { value: 'Bien-être', caption: 'Yoga, méditation, parenthèses au calme.' },
-  { value: 'Gastronomie', caption: 'Brunchs, grandes tables, bonnes adresses.' },
-  { value: 'Sortie', caption: 'Rooftops, concerts, comédie, afters.' },
+const interests: readonly Interest[] = [
+  'Apéro',
+  'Sport',
+  'Atelier créatif',
+  'Talk',
+  'Bien-être',
+  'Gastronomie',
+  'Sortie',
 ];
 
 interface InterestsStepProps {
@@ -42,7 +33,7 @@ export function InterestsStep({ onComplete, onBack }: InterestsStepProps) {
     <View style={styles.root}>
       <FlatList
         data={interests}
-        keyExtractor={(item) => item.value}
+        keyExtractor={(item) => item}
         numColumns={2}
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.list}
@@ -51,19 +42,14 @@ export function InterestsStep({ onComplete, onBack }: InterestsStepProps) {
           <View style={styles.header}>
             <Text style={styles.step}>Étape 5 sur 5</Text>
             <Text style={styles.title}>Tes centres d'intérêt&nbsp;?</Text>
-            <Text style={styles.subtitle}>
-              Choisis au moins deux univers qui te ressemblent. On s'occupe du
-              reste.
-            </Text>
           </View>
         }
         renderItem={({ item }) => (
           <InterestCard
-            label={item.value}
-            caption={item.caption}
-            photoUrl={INTEREST_PHOTOS[item.value]}
-            selected={selected.includes(item.value)}
-            onPress={() => toggle(item.value)}
+            label={item}
+            photoUrl={INTEREST_PHOTOS[item]}
+            selected={selected.includes(item)}
+            onPress={() => toggle(item)}
           />
         )}
         ItemSeparatorComponent={() => <View style={styles.rowGap} />}
