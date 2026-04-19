@@ -74,8 +74,8 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
             </Text>
             <Text style={styles.description}>
               Des apéros, du sport, des ateliers, des talks —{' '}
-              <Text style={styles.descriptionAccent}>entre filles</Text>, dans 5
-              villes.
+              <Text style={styles.descriptionAccent}>entre filles</Text>, dans
+              ta ville.
             </Text>
           </View>
 

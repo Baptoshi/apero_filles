@@ -9,6 +9,7 @@ import { AuthStep } from '@/components/onboarding/AuthStep';
 import { CityStep } from '@/components/onboarding/CityStep';
 import { InterestsStep } from '@/components/onboarding/InterestsStep';
 import { NameStep } from '@/components/onboarding/NameStep';
+import { PhotoStep } from '@/components/onboarding/PhotoStep';
 import { WelcomeStep } from '@/components/onboarding/WelcomeStep';
 import { Colors } from '@/constants/colors';
 import { Spacing } from '@/constants/spacing';
@@ -17,15 +18,23 @@ import { useAuthStore, type AuthMode } from '@/stores/useAuthStore';
 /**
  * Onboarding flow :
  *
- *   welcome  →  auth  →  (sign-up)  name → city → age → interests  →  (tabs)
- *                     →  (sign-in)  direct login                    →  (tabs)
+ *   welcome  →  auth  →  (sign-up)  name → photo → city → age → interests → (tabs)
+ *                     →  (sign-in)  direct login                           → (tabs)
  *
- * The progress bar only runs on the profile-building steps (name / city /
- * age / interests). Welcome + auth are treated as "pre-onboarding" gates.
+ * The progress bar only runs on the profile-building steps (name / photo /
+ * city / age / interests). Welcome + auth are treated as "pre-onboarding"
+ * gates.
  */
-type StepId = 'welcome' | 'auth' | 'name' | 'city' | 'age' | 'interests';
+type StepId =
+  | 'welcome'
+  | 'auth'
+  | 'name'
+  | 'photo'
+  | 'city'
+  | 'age'
+  | 'interests';
 
-const profileSteps: StepId[] = ['name', 'city', 'age', 'interests'];
+const profileSteps: StepId[] = ['name', 'photo', 'city', 'age', 'interests'];
 
 export default function OnboardingScreen() {
   const router = useRouter();
@@ -107,6 +116,10 @@ export default function OnboardingScreen() {
 
         {step === 'name' ? (
           <NameStep onNext={goNext} onBack={goBackProfile} />
+        ) : null}
+
+        {step === 'photo' ? (
+          <PhotoStep onNext={goNext} onBack={goBackProfile} />
         ) : null}
 
         {step === 'city' ? (

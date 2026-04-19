@@ -106,7 +106,13 @@ export function BottomSheet({
           style={[
             styles.sheet,
             {
-              maxHeight: screenHeight * maxHeightRatio,
+              // Explicit height (not maxHeight) so children with `flex: 1`
+              // have a concrete box to distribute — that's what unlocks
+              // scroll inside ScrollView / FlatList on web. Without this,
+              // flex children resolve to `auto`, the inner list keeps its
+              // intrinsic content height, and wheel events have nothing
+              // to scroll against.
+              height: screenHeight * maxHeightRatio,
               paddingBottom: Math.max(insets.bottom, Spacing.lg),
             },
             sheetStyle,
@@ -122,7 +128,16 @@ export function BottomSheet({
           >
             <View style={styles.handle} />
           </Pressable>
-          {children}
+          {/*
+            `flexShrink: 1 + minHeight: 0` gives this wrapper a bounded height
+            inside the sheet's maxHeight → any ScrollView / FlatList inside
+            actually has a height to scroll within. Without this the child
+            list gets its intrinsic content height and overflows silently
+            past the visible area of the sheet on web.
+          */}
+          <View style={styles.contentWrap}>
+            {children}
+          </View>
         </Animated.View>
       </View>
     </PlatformModal>
@@ -147,11 +162,19 @@ const styles = StyleSheet.create({
     borderTopRightRadius: Radius.xl,
     paddingTop: Spacing.sm,
     paddingHorizontal: Spacing.xl,
+    overflow: 'hidden',
     shadowColor: Colors.shadow,
     shadowOffset: { width: 0, height: -12 },
     shadowOpacity: 0.16,
     shadowRadius: 32,
     elevation: 12,
+  },
+  contentWrap: {
+    flexShrink: 1,
+    // `minHeight: 0` is the web-flex escape hatch — lets the wrapper shrink
+    // below its intrinsic content height, which is what unlocks scrolling
+    // in the nested ScrollView / FlatList.
+    minHeight: 0,
   },
   handleWrap: {
     alignItems: 'center',

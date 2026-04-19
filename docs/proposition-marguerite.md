@@ -78,17 +78,25 @@ revisitée que j'ai eu l'occasion de peaufiner ce week-end.
 
 ### 2.2 Onboarding (sign-up uniquement)
 
-Une fois le compte créé, on collecte en 4 étapes courtes :
+Une fois le compte créé, on collecte en **5 étapes courtes** :
 
-1. **Prénom** (requis) et **nom** (facultatif).
-2. **Ville** parmi les 5 villes (carte visuelle avec description
+1. **Identité** — prénom (requis) + nom, Instagram, téléphone (tous
+   facultatifs, avec mention "visible uniquement par les membres" pour
+   Instagram).
+2. **Photo de profil** — écran dédié style Tinder : grande card 4:5 au
+   centre, tap pour ouvrir la galerie, puis **recadrage dynamique**
+   (grille règle des tiers, pan + pinch pour zoomer). Facultatif mais
+   soft-nudgé : tant qu'aucune photo n'est ajoutée le bouton `Plus tard`
+   est en ghost, dès qu'une photo est chargée il devient un `Continuer`
+   primary terracotta.
+3. **Ville** parmi les 5 villes (carte visuelle avec description
    éditoriale).
-3. **Tranche d'âge**.
-4. **Centres d'intérêt** parmi les 7 catégories (Apéro, Sport, Atelier
+4. **Tranche d'âge**.
+5. **Centres d'intérêt** parmi les 7 catégories (Apéro, Sport, Atelier
    créatif, Talk, Bien-être, Gastronomie, Sortie) — choix visuel via
    grosses cards photo.
 
-Barre de progression affichée uniquement sur ces 4 étapes pour que
+Barre de progression affichée uniquement sur ces 5 étapes pour que
 l'onboarding reste rapide et perçu comme tel.
 
 ### 2.3 Découverte et engagement (feed + discover)
@@ -138,14 +146,50 @@ l'onboarding reste rapide et perçu comme tel.
   participantes de ma ville, je peux aller voir leur profil détaillé.
 - La page est en preview pour les non-membres (CTA paywall).
 
-### 2.8 Mon profil
+### 2.8 Mon profil — tout modifiable
 
-- Photo, prénom, âge, ville, statut (membre du club/fidèle).
-- Parcours : niveau de fidélité basé sur le nombre d'événements participés
-  (5 paliers : Nouvelle venue → Ambassadrice).
-- Statistiques : événements, filles rencontrées, membre depuis.
-- Favoris, centres d'intérêt, paramètres, gestion de l'abonnement,
-  déconnexion.
+La page profil fait office de centre de contrôle. Toutes les sections
+sont **éditables via une popup dédiée** — un seul pattern : tap → sheet
+→ save → mise à jour immédiate du profil (en prod ça mappera sur
+`PATCH /me` côté backend).
+
+**Identité** (cover terracotta + avatar ring)
+- Photo de profil : tap sur l'avatar → picker → **cropper Tinder-style**
+  (même flux que l'onboarding).
+- Bouton `⋯` en haut-droit → ouvre les **réglages de confidentialité**.
+
+**Bio** (nouvelle section)
+- 200 caractères maximum, éditable via popup avec compteur live.
+- Affichée en Playfair italique comme une citation éditoriale.
+
+**Statistiques** : événements, rencontrées, membre depuis (MM/YYYY).
+
+**Mes favoris** : lien vers la grille des événements sauvegardés
+(futurs, présents et passés confondus, triés par date).
+
+**Centres d'intérêt** : chips, tap → popup multi-select (au moins 2).
+
+**Mon identité** : 4 lignes éditables — prénom, nom, ville
+(`CityPicker`), Instagram.
+
+**Paramètres** : Notifications (push + email, toggles dans une popup)
+et email (éditable).
+
+**Footer** : `Gérer mon abonnement` | `Se déconnecter` côte à côte.
+
+### 2.9 Confidentialité — tu choisis ce qu'on voit
+
+Panneau dédié ouvert depuis le `⋯` sur la cover du profil.
+
+- **Master switch** : `Rendre mon profil visible` — quand off, profil
+  masqué partout (annuaire, pages d'événement), les toggles détaillés se
+  grisent.
+- **Toggles par champ** (identité / à propos / stats) : prénom, nom,
+  âge, ville, bio, centres d'intérêt, Instagram, nombre d'événements,
+  filles rencontrées.
+- Valeurs par défaut raisonnables : prénom / âge / ville / bio / centres
+  d'intérêt ON ; nom / Instagram / filles rencontrées OFF.
+- Tout est syncé immédiatement dans le store (et côté backend en prod).
 
 ---
 

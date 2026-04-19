@@ -32,18 +32,33 @@ import { useAuthStore } from '@/stores/useAuthStore';
  */
 
 interface Plan {
-  id: '1m' | '3m' | '6m';
+  id: 'free' | '1m' | '3m' | '6m';
   name: string;
   promise: string;
   priceMonthly: string;
+  /** Secondary line under the price — total engagement or limits. */
   total: string;
-  totalAmount: string;
+  /** What the CTA displays on the right-hand side. `null` = no amount. */
+  totalAmount: string | null;
   saving: string | null;
+  /** Uppercase chip inside the card ("Populaire", "Gratuit", etc.). */
   badge: string | null;
-  highlight: boolean;
+  /** Free tier card is informational, no subscription happens if selected. */
+  isFree?: boolean;
 }
 
 const plans: Plan[] = [
+  {
+    id: 'free',
+    name: 'Découverte',
+    promise: 'Pour tester l\'app, sans s\'engager.',
+    priceMonthly: 'Gratuit',
+    total: '1 événement par mois, au prix plein',
+    totalAmount: null,
+    saving: null,
+    badge: 'Gratuit',
+    isFree: true,
+  },
   {
     id: '1m',
     name: "L'Étincelle",
@@ -53,7 +68,6 @@ const plans: Plan[] = [
     totalAmount: '18,90 €',
     saving: null,
     badge: null,
-    highlight: false,
   },
   {
     id: '3m',
@@ -64,7 +78,6 @@ const plans: Plan[] = [
     totalAmount: '46,50 €',
     saving: '−18 %',
     badge: null,
-    highlight: false,
   },
   {
     id: '6m',
@@ -75,17 +88,24 @@ const plans: Plan[] = [
     totalAmount: '75 €',
     saving: '−34 %',
     badge: 'Populaire',
-    highlight: true,
   },
 ];
 
-const benefits = [
+/** What a paid club member unlocks. */
+const clubBenefits = [
   'Accès illimité aux événements',
-  'Prix membres (−30 à −50 % selon l\'event)',
+  'Prix membres (−30 à −50 % selon l\'événement)',
   'Tous les QR bons plans partenaires débloqués',
   'Annuaire complet des adhérentes',
-  'Priorité d\'inscription sur les events populaires',
-  'Newsletter éditoriale + drip d\'onboarding',
+  'Priorité d\'inscription sur les événements populaires',
+];
+
+/** What a Découverte (free) user actually gets — bare essentials. */
+const freeBenefits = [
+  'Accès à la navigation et à la découverte',
+  '1 événement par mois, au prix plein',
+  'Bookmarks et favoris',
+  'Aperçu de l\'annuaire et des bons plans (QR verrouillé)',
 ];
 
 export default function SubscribeScreen() {
@@ -102,13 +122,19 @@ export default function SubscribeScreen() {
   const snapInterval = cardWidth + cardGap;
 
   const activePlan = useMemo(
-    () => plans.find((p) => p.id === selected) ?? plans[2],
+    () => plans.find((p) => p.id === selected) ?? plans[3],
     [selected],
   );
 
   if (!activePlan) return null;
 
-  const subscribe = () => {
+  const onCta = () => {
+    // Selecting "Découverte" just closes the paywall — no subscription,
+    // no tier change (she stays free).
+    if (activePlan.isFree) {
+      router.back();
+      return;
+    }
     setTier('member');
     router.back();
   };
@@ -175,13 +201,15 @@ export default function SubscribeScreen() {
         <View style={styles.benefitsHeaderWrap}>
           <View style={styles.benefitsHeader}>
             <Text style={styles.benefitsHeaderLabel}>
-              Inclus avec le club
+              {activePlan.isFree
+                ? 'Inclus avec Découverte'
+                : 'Inclus avec le club'}
             </Text>
           </View>
         </View>
 
         <View style={styles.benefits}>
-          {benefits.map((benefit) => (
+          {(activePlan.isFree ? freeBenefits : clubBenefits).map((benefit) => (
             <View key={benefit} style={styles.benefitRow}>
               <View style={styles.benefitCheck}>
                 <Check
@@ -196,22 +224,39 @@ export default function SubscribeScreen() {
         </View>
 
         <Text style={styles.legal}>
-          En touchant « Continuer », tu t'abonnes à la formule{' '}
-          <Text style={styles.legalBold}>{activePlan.name}</Text>. Ton abonnement
-          sera reconduit automatiquement au même tarif jusqu'à résiliation, que
-          tu peux effectuer à tout moment depuis ton profil.
+          {activePlan.isFree ? (
+            <>
+              Tu restes en formule{' '}
+              <Text style={styles.legalBold}>Découverte</Text> — tu pourras
+              rejoindre le club à tout moment depuis ton profil.
+            </>
+          ) : (
+            <>
+              En touchant « Continuer », tu t'abonnes à la formule{' '}
+              <Text style={styles.legalBold}>{activePlan.name}</Text>. Ton
+              abonnement sera reconduit automatiquement au même tarif jusqu'à
+              résiliation, que tu peux effectuer à tout moment depuis ton
+              profil.
+            </>
+          )}
         </Text>
       </ScrollView>
 
       <View style={styles.footer}>
         <Pressable
-          onPress={subscribe}
+          onPress={onCta}
           accessibilityRole="button"
-          accessibilityLabel={`Continuer — ${activePlan.totalAmount} au total`}
+          accessibilityLabel={
+            activePlan.isFree
+              ? 'Rester en Découverte'
+              : `Continuer — ${activePlan.totalAmount} au total`
+          }
           style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}
         >
           <Text style={styles.ctaLabel}>
-            Continuer · {activePlan.totalAmount}
+            {activePlan.isFree
+              ? 'Rester en Découverte'
+              : `Continuer · ${activePlan.totalAmount}`}
           </Text>
         </Pressable>
       </View>
@@ -241,7 +286,14 @@ function PlanCard({ plan, selected, onPress, width }: PlanCardProps) {
       ]}
     >
       {plan.badge ? (
-        <Text style={styles.planBadge}>{plan.badge}</Text>
+        <Text
+          style={[
+            styles.planBadge,
+            plan.isFree ? styles.planBadgeMuted : null,
+          ]}
+        >
+          {plan.badge}
+        </Text>
       ) : (
         <Text style={styles.planBadgePlaceholder}> </Text>
       )}
@@ -259,7 +311,9 @@ function PlanCard({ plan, selected, onPress, width }: PlanCardProps) {
 
       <View style={styles.planPriceRow}>
         <Text style={styles.planPrice}>{plan.priceMonthly}</Text>
-        <Text style={styles.planPriceSuffix}> / mois</Text>
+        {plan.isFree ? null : (
+          <Text style={styles.planPriceSuffix}> / mois</Text>
+        )}
       </View>
 
       <Text style={styles.planTotal}>{plan.total}</Text>
@@ -351,6 +405,9 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.8,
     marginBottom: 4,
+  },
+  planBadgeMuted: {
+    color: TEXT_SECONDARY,
   },
   planBadgePlaceholder: {
     ...Typography.small,

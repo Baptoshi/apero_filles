@@ -53,6 +53,14 @@ function FeedCardComponent({
       spotlightSize={300}
       maxOpacity={0.45}
     >
+      {/*
+        Two sibling `Pressable`s inside the SpotlightCard :
+          1. `cardTap` — the main tap area, wraps the visual content.
+          2. `heartBtn` — absolute-positioned on top so it wins hit-testing
+             in its small corner area.
+        Making them siblings (and not nested) avoids the DOM
+        `<button>` cannot appear as a descendant of `<button>` warning on web.
+      */}
       <Pressable
         onPress={onPress}
         accessibilityRole="button"
@@ -76,25 +84,6 @@ function FeedCardComponent({
               <FomoPill badge={fomo} />
             </View>
           ) : null}
-
-          <Pressable
-            onPress={onToggleBookmark}
-            accessibilityRole="button"
-            accessibilityLabel={bookmarked ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-            accessibilityState={{ selected: bookmarked }}
-            hitSlop={12}
-            style={({ pressed }) => [
-              styles.likeAbs,
-              pressed && styles.likePressed,
-            ]}
-          >
-            <Heart
-              size={IconSize.content + 4}
-              color={bookmarked ? Colors.accent : Colors.white}
-              fill={bookmarked ? Colors.accent : 'transparent'}
-              strokeWidth={2}
-            />
-          </Pressable>
         </View>
 
         <View style={styles.body}>
@@ -121,6 +110,25 @@ function FeedCardComponent({
             <PriceBlock tier={tier} price={price} />
           </View>
         </View>
+      </Pressable>
+
+      <Pressable
+        onPress={onToggleBookmark}
+        accessibilityRole="button"
+        accessibilityLabel={bookmarked ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+        accessibilityState={{ selected: bookmarked }}
+        hitSlop={12}
+        style={({ pressed }) => [
+          styles.likeAbs,
+          pressed && styles.likePressed,
+        ]}
+      >
+        <Heart
+          size={IconSize.content + 4}
+          color={bookmarked ? Colors.accent : Colors.white}
+          fill={bookmarked ? Colors.accent : 'transparent'}
+          strokeWidth={2}
+        />
       </Pressable>
     </SpotlightCard>
   );
@@ -195,8 +203,11 @@ const styles = StyleSheet.create({
   },
   likeAbs: {
     position: 'absolute',
-    top: Spacing.md,
-    right: Spacing.md,
+    // Card has `padding: Spacing.md` on the main tap wrapper + the thumb
+    // starts at the top ; we offset by the same amount so the heart sits at
+    // the top-right of the photo (matching the previous nested layout).
+    top: Spacing.md + Spacing.md,
+    right: Spacing.md + Spacing.md,
     padding: 6,
   },
   likePressed: {

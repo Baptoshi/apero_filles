@@ -101,7 +101,10 @@ export function NotificationsSheet({ visible, onClose }: NotificationsSheetProps
 
 const styles = StyleSheet.create({
   list: {
-    flexShrink: 1,
+    // `flex: 1` + `minHeight: 0` gives the FlatList a bounded height inside
+    // the sheet's contentWrap → overflow-y: auto kicks in and scroll works.
+    flex: 1,
+    minHeight: 0,
   },
   listContent: {
     paddingTop: Spacing.sm,

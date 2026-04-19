@@ -27,7 +27,25 @@ export function PlatformModal({ visible, onRequestClose, children }: PlatformMod
     void onRequestClose;
     return (
       <View
-        style={[StyleSheet.absoluteFillObject, styles.webOverlay]}
+        // `position: fixed` on web sidesteps intermediate ancestors (safe
+        // areas, scroll views, stacking contexts…) and mounts the overlay
+        // relative to the nearest transformed container — our `PhoneFrame`
+        // deviceWrap. We set top/left/right/bottom explicitly rather than
+        // the CSS shorthand `inset` because RN Web's style parser doesn't
+        // always expand it — without proper anchors the overlay had no
+        // height, and flex children (incl. the cropper's save footer)
+        // collapsed to zero.
+        style={[
+          styles.webOverlay,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          {
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          } as any,
+        ]}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         {...({ pointerEvents: 'box-none' } as any)}
       >

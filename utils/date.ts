@@ -59,3 +59,39 @@ export function isUpcoming(iso: string, now: Date = new Date()): boolean {
   if (!date) return false;
   return date.getTime() >= now.getTime();
 }
+
+/**
+ * French month names → 2-digit month index. Used to normalise the mock
+ * `memberSince` field ("mars 2024") into a compact "MM/YYYY" stamp for
+ * the profile stats + subscription sheet.
+ */
+const FR_MONTHS: Record<string, string> = {
+  janvier: '01',
+  février: '02',
+  fevrier: '02',
+  mars: '03',
+  avril: '04',
+  mai: '05',
+  juin: '06',
+  juillet: '07',
+  août: '08',
+  aout: '08',
+  septembre: '09',
+  octobre: '10',
+  novembre: '11',
+  décembre: '12',
+  decembre: '12',
+};
+
+/**
+ * Format a loose "mois YYYY" string into "MM/YYYY". Falls back to the
+ * original input if the month can't be parsed — safe to use anywhere.
+ */
+export function formatMonthYear(value: string): string {
+  const normalised = value.trim().toLowerCase();
+  const [rawMonth, rawYear] = normalised.split(/\s+/);
+  if (!rawMonth || !rawYear) return value;
+  const mm = FR_MONTHS[rawMonth];
+  if (!mm) return value;
+  return `${mm}/${rawYear}`;
+}

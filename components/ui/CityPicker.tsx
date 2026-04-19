@@ -66,7 +66,8 @@ export function CityPicker({ visible, selected, onClose, onSelect }: CityPickerP
 
 const styles = StyleSheet.create({
   scroll: {
-    flexShrink: 1,
+    flex: 1,
+    minHeight: 0,
   },
   body: {
     paddingTop: Spacing.sm,
