@@ -31,10 +31,11 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
       <Video
         ref={videoRef}
         source={require('../../assets/videos/onboarding.mp4')}
-        style={StyleSheet.absoluteFill}
-        // CONTAIN keeps the whole frame visible (no zoom / no crop).
-        // The root background (Colors.black) fills any letterbox space so
-        // the video still reads as full-screen.
+        // `absoluteFill` + CONTAIN shows the full video ; the scale pulls it
+        // back a touch so the content feels less tight while the layout still
+        // reads as full-screen (the root's black background + gradient cover
+        // the small inset that appears around the video).
+        style={[StyleSheet.absoluteFill, styles.video]}
         resizeMode={ResizeMode.CONTAIN}
         isLooping
         shouldPlay
@@ -96,6 +97,11 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: Colors.black,
+  },
+  video: {
+    // Pulls the video back so the framing feels less tight without losing
+    // the full-screen feel (the root's black background fills the inset).
+    transform: [{ scale: 0.78 }],
   },
   safe: {
     flex: 1,

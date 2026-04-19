@@ -580,101 +580,157 @@ aux 3 rôles avec des vues adaptées.
 
 ---
 
-## 9 — Planning : 3 sprints d'une semaine
+## 9 — Planning : 3 sprints, 3 jalons
 
-### Semaine 1 — Fondations (Sprint 1)
+Chaque semaine correspond à un sprint **et** à un jalon de livraison. Le
+paiement suit les jalons — tu ne payes rien tant que le livrable n'est
+pas entre tes mains.
 
-**Objectif : toute l'infra est prête, l'app tourne en staging avec des
-données mock.**
+### Vue d'ensemble
 
-- Setup repos (app, api, cms, admin) + CI/CD GitHub Actions.
-- Provisionnement 3 environnements (Supabase, Vercel, S3, Sentry, Brevo,
-  Sanity).
-- Schéma base de données + migrations initiales.
-- Auth + RBAC (3 rôles).
+| Jalon | Quand | Livrable observable | Paiement |
+|---|---|---|---|
+| **M1 — Kickoff & fondations** | Signature → fin S1 | Infra + staging accessible | 2 000 € TTC |
+| **M2 — Cœur applicatif** | Fin S2 | App fonctionnelle en staging | 2 000 € TTC |
+| **M3 — Mise en production** | Fin S3 | App en production + stores | 2 000 € TTC |
+| **Total** | 3 semaines | — | **6 000 € TTC** |
+
+### Sprint 1 (semaine 1) — Fondations
+
+**Objectif :** toute l'infra est prête, l'app tourne en staging avec des
+données mock.
+
+- Setup des repos (app, api, cms, admin) + CI/CD GitHub Actions.
+- Provisionnement des 3 environnements (Supabase, Vercel, S3, Sentry,
+  Brevo, Sanity).
+- Schéma de la base de données + migrations initiales.
+- Auth (Google + Apple + Email avec détection smart) + RBAC (3 rôles).
 - Sanity CMS : 3 workspaces + schémas + permissions.
-- Design system finalisé + charte graphique appliquée.
+- Design system finalisé + charte graphique appliquée côté front.
 - App mobile : squelette de navigation + onboarding fonctionnel.
 
-### Semaine 2 — Cœur applicatif (Sprint 2)
+**Livrable M1 — Kickoff & fondations.** À la fin du sprint, tu peux
+ouvrir l'app en staging, t'inscrire avec Google / Apple / email, et
+naviguer la coquille des 5 onglets.
 
-**Objectif : une fille peut s'inscrire, découvrir un event, payer, avoir
-son ticket.**
+### Sprint 2 (semaine 2) — Cœur applicatif
 
-- Écrans Accueil, Discover, Event detail, Profil (version complète).
-- Intégration Stripe (abonnement + tickets) avec webhooks.
+**Objectif :** une fille peut découvrir un event, s'inscrire, payer,
+avoir son ticket. Un abonnement peut être souscrit.
+
+- Écrans complets Accueil, Discover, Event detail, Profil.
+- Intégration Stripe : paiements unitaires + abonnements mensuels / 3
+  mois / 6 mois avec webhooks.
 - Feed personnalisé branché sur l'algorithme de recommandation.
-- Brevo : templates transactionnels + premières automations.
-- Back-office propriétaire : création d'events, gestion partenaires,
-  dashboard financier.
+- Brevo : templates transactionnels (inscription, paiement, rappel J-2)
+  + premières automations.
+- Back-office propriétaire : création d'events, gestion des partenaires,
+  dashboard financier de base.
 - Tests automatisés sur les flows critiques (inscription, paiement,
-  abonnement).
+  abonnement, résiliation).
 
-### Semaine 3 — Extension, modération, prod (Sprint 3)
+**Livrable M2 — Cœur applicatif en staging.** Tu peux jouer un parcours
+complet en condition réelle sur staging (hors stores), avec des clés
+Stripe de test. Recette possible avant de déclencher la prod.
 
-**Objectif : l'app est complète, testée, déployée en prod.**
+### Sprint 3 (semaine 3) — Extension, modération, prod
 
-- Page Bons Plans + QR code des partenaires.
+**Objectif :** l'app est complète, QA passée, déployée en production,
+disponible sur les stores.
+
+- Page Bons Plans + QR code partenaires débloqués pour les abonnées.
 - Page Filles (annuaire gated).
 - Back-office manageuse de ville + modérateur.
-- File de signalements + audit log.
-- Newsletter Brevo + drip d'onboarding.
-- Analytics produit.
-- QA complète (appareils iOS / Android / web).
-- Soumission **TestFlight** + **Play Console internal testing**.
+- File de signalements + audit log sur les actions sensibles.
+- Newsletter Brevo + drip d'onboarding (J+0, J+3, J+7).
+- Analytics produit (événements clés : inscription, paiement, abonnement).
+- QA complète sur iOS, Android, web.
+- Soumission **TestFlight** (iOS) + **Play Console internal testing**.
 - Déploiement production + passage des DNS.
 - Documentation utilisateur (guide Marguerite + guide manageuses).
+
+**Livrable M3 — Mise en production.** L'app est accessible à tes
+premières utilisatrices. La docu est remise. Le mois de garantie démarre
+ici.
 
 ---
 
 ## 10 — Pricing
 
-### Forfait complet "Les Apéros Filles V1"
+> Ce pricing concerne le **développement de l'app**. Il est distinct du
+> modèle d'abonnement côté utilisatrices décrit en § 3 bis.
+
+### Détail du forfait — « Les Apéros Filles V1 »
 
 | Poste | HT |
 |---|---|
 | Architecture + 3 environnements + CI/CD | 800 € |
-| App mobile (iOS / Android / web) | 1 600 € |
+| App mobile (iOS / Android / web, une codebase) | 1 600 € |
 | Back-end API + base de données + RBAC | 1 200 € |
 | Back-office (propriétaire, manageuse, modérateur) | 800 € |
-| Intégrations Stripe, Brevo, Sanity, Mapbox | 400 € |
+| Intégrations Stripe, Brevo, Sanity, Mapbox, Auth | 400 € |
 | QA, déploiement, documentation | 200 € |
 | **Total HT** | **5 000 €** |
 | **TVA (20 %)** | **1 000 €** |
 | **Total TTC** | **6 000 €** |
 
-Paiement en trois fois :
-- **2 000 € TTC** à la signature (sprint 1).
-- **2 000 € TTC** à la livraison staging en fin de sprint 2.
-- **2 000 € TTC** à la livraison production en fin de sprint 3.
+### Échéancier de paiement — aligné sur les jalons
+
+Les paiements suivent les jalons du § 9. Chaque versement est déclenché
+par la **validation formelle** du livrable correspondant.
+
+| Versement | Déclenché par | Montant TTC |
+|---|---|---|
+| Acompte | Signature du devis → **M1 Kickoff** | 2 000 € |
+| Intermédiaire | Validation **M2 Cœur applicatif** (recette staging) | 2 000 € |
+| Solde | Validation **M3 Mise en production** | 2 000 € |
+| **Total** | | **6 000 €** |
+
+Facture émise à chaque jalon, paiement sous 7 jours après validation.
+En cas de non-validation d'un livrable à l'échéance, on se réunit pour
+identifier le blocage — aucune sanction, on partage la responsabilité de
+la recette.
 
 ### Ce qui est inclus
 
 - L'app mobile iOS + Android + web en une seule codebase.
 - Le back-end complet + l'API.
-- Les 3 back-offices (propriétaire, manageuse, modérateur).
-- Les 3 environnements (dev / staging / prod) avec CI/CD.
-- L'intégration de tous les services tiers listés.
-- La mise en ligne sur l'App Store et le Play Store (je prends en charge
-  les soumissions).
-- La documentation utilisateur.
-- **1 mois de garantie** post-livraison (correction de bugs sans frais).
+- Les 3 back-offices (propriétaire, manageuse de ville, modérateur).
+- Les 3 environnements (dev / staging / prod) avec CI/CD GitHub Actions.
+- L'intégration de tous les services tiers listés au § 7.
+- L'auth complète (Google, Apple, Email, welcome-back intelligent).
+- Le moteur de recommandation tel que décrit au § 5.
+- La mise en ligne sur l'App Store et le Play Store (soumissions à ma
+  charge, sous réserve que les comptes développeurs soient ouverts).
+- La documentation utilisateur (guides propriétaire + manageuse).
+- **1 mois de garantie** post-production (correction de bugs sans frais).
 
 ### Ce qui n'est pas inclus
 
-- Les **abonnements aux services tiers** (Stripe prend sa commission sur
-  les ventes, Brevo/Sanity/Sentry/Supabase ont leurs propres plans — je te
-  conseille de partir sur le tier gratuit ou premier tier payant pour la
-  V1, comptez ~50-80 €/mois combinés pour démarrer).
-- Les **frais de compte développeur** Apple (99 $/an) et Google (25 $ une
-  fois) — à ouvrir à ton nom.
-- Le **design illustrations / photos / vidéos** additionnels si on veut
-  remplacer les stocks par du contenu propre.
-- La **maintenance mensuelle** après le mois de garantie — on peut voir
-  pour un contrat séparé si tu veux que je continue à m'occuper de l'app
-  (~400 €/mois pour garder la stack à jour + petits correctifs).
-- Les **nouvelles fonctionnalités hors du scope de ce document** — tout
+- Les **abonnements aux services tiers** (Brevo, Sanity, Sentry,
+  Supabase, Cloudflare…) — compter ~50 à 80 €/mois combinés pour la V1
+  sur les tiers gratuit / first-paid.
+- Les **commissions Stripe** sur les ventes (2,5 % + 0,25 € par transaction
+  CB en France, à jour 2026).
+- Les **frais des comptes développeurs** Apple (99 $/an) et Google
+  Play (25 $ une fois) — à ouvrir à ton nom.
+- Le **contenu propre** : photos, vidéos, illustrations personnalisées.
+  On part sur des stocks Unsplash pour la V1, remplaçables plus tard.
+- La **maintenance mensuelle** après le mois de garantie : un contrat
+  séparé peut être mis en place (~400 €/mois pour garder la stack à jour,
+  traiter les petits correctifs, assurer un temps de réponse défini).
+- Les **nouvelles fonctionnalités hors du scope de ce document** : tout
   ajout significatif fait l'objet d'un devis complémentaire.
+
+### Conditions
+
+- Devis valable 30 jours à compter de la date d'émission.
+- Démarrage sous 7 jours après signature + réception de l'acompte.
+- Travaillé en pseudo full-time pendant 3 semaines consécutives.
+- Communication quotidienne (courts points async) + un call hebdo de
+  30 min pour valider les livrables.
+- Code poussé sur un repo **GitHub** dont tu auras l'accès dès le
+  premier commit.
 
 ---
 
