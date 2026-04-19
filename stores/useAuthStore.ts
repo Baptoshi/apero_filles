@@ -3,7 +3,15 @@ import { create } from 'zustand';
 import { currentUser } from '@/data/mock';
 import type { City, Interest, MembershipTier, User } from '@/types/user';
 
+export type AuthMode = 'sign-in' | 'sign-up';
+export type AuthProvider = 'email' | 'google';
+
 interface OnboardingDraft {
+  mode: AuthMode;
+  provider: AuthProvider | null;
+  email: string;
+  firstName: string;
+  lastName: string;
   city: City | null;
   age: number | null;
   interests: Interest[];
@@ -17,6 +25,11 @@ interface AuthState {
   onboardingDraft: OnboardingDraft;
 
   // Onboarding actions
+  setDraftMode: (mode: AuthMode) => void;
+  setDraftProvider: (provider: AuthProvider) => void;
+  setDraftEmail: (email: string) => void;
+  setDraftFirstName: (firstName: string) => void;
+  setDraftLastName: (lastName: string) => void;
   setDraftCity: (city: City) => void;
   setDraftAge: (age: number) => void;
   toggleDraftInterest: (interest: Interest) => void;
@@ -36,6 +49,11 @@ interface AuthState {
 }
 
 const emptyDraft: OnboardingDraft = {
+  mode: 'sign-up',
+  provider: null,
+  email: '',
+  firstName: '',
+  lastName: '',
   city: null,
   age: null,
   interests: [],
@@ -49,6 +67,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   tier: 'free',
   onboardingDraft: { ...emptyDraft },
+
+  setDraftMode: (mode) =>
+    set((state) => ({ onboardingDraft: { ...state.onboardingDraft, mode } })),
+
+  setDraftProvider: (provider) =>
+    set((state) => ({ onboardingDraft: { ...state.onboardingDraft, provider } })),
+
+  setDraftEmail: (email) =>
+    set((state) => ({ onboardingDraft: { ...state.onboardingDraft, email } })),
+
+  setDraftFirstName: (firstName) =>
+    set((state) => ({
+      onboardingDraft: { ...state.onboardingDraft, firstName },
+    })),
+
+  setDraftLastName: (lastName) =>
+    set((state) => ({
+      onboardingDraft: { ...state.onboardingDraft, lastName },
+    })),
 
   setDraftCity: (city) =>
     set((state) => ({ onboardingDraft: { ...state.onboardingDraft, city } })),
@@ -69,6 +106,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const draft = get().onboardingDraft;
     const merged: User = {
       ...currentUser,
+      firstName: draft.firstName.trim() || currentUser.firstName,
+      lastName: draft.lastName.trim() || currentUser.lastName,
+      email: draft.email.trim() || currentUser.email,
       city: draft.city ?? currentUser.city,
       age: draft.age ?? currentUser.age,
       interests: draft.interests.length > 0 ? draft.interests : currentUser.interests,

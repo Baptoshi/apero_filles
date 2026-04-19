@@ -32,7 +32,10 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
         ref={videoRef}
         source={require('../../assets/videos/onboarding.mp4')}
         style={StyleSheet.absoluteFill}
-        resizeMode={ResizeMode.COVER}
+        // CONTAIN keeps the whole frame visible (no zoom / no crop).
+        // The root background (Colors.black) fills any letterbox space so
+        // the video still reads as full-screen.
+        resizeMode={ResizeMode.CONTAIN}
         isLooping
         shouldPlay
         isMuted

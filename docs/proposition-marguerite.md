@@ -50,28 +50,48 @@ avantages chez des partenaires locaux, et l'accès à l'annuaire des membres.
   l'unité)** + **abonnement récurrent** pour les prix membres et les bons
   plans partenaires.
 
-### Trois profils côté utilisatrice
-
-- **Membre découverte** (gratuit) : accès à la navigation, 1 événement par
-  mois au prix plein, pas d'accès aux bons plans, pas d'annuaire.
-- **Membre du club** (9,99 €/mois) : accès illimité aux prix membres, aux
-  bons plans partenaires, à l'annuaire.
-- **Membre fidèle** (après 6 mois d'abonnement continu) : même accès, mais
-  le statut est reconnu dans l'app (badge, traitement visuel distinct).
+Pour le détail du modèle d'abonnement (freemium + engagements 1 / 3 / 6
+mois), voir la section **§ 3 bis** ci-dessous — je te propose une version
+revisitée que j'ai eu l'occasion de peaufiner ce week-end.
 
 ---
 
 ## 2 — Parcours utilisatrice et user stories
 
-### 2.1 Onboarding
+### 2.1 Arrivée et authentification
 
-- Je découvre l'app via une vidéo d'accueil en boucle et un message chaleureux.
-- Je choisis ma ville (5 villes), mon âge, mes centres d'intérêt parmi :
-  Apéro, Sport, Atelier créatif, Talk, Bien-être, Gastronomie, Sortie
-  (choix visuel type grosses cards photo).
-- Je crée mon profil (prénom, âge, bio courte, photo, Instagram optionnel).
+- **Écran d'accueil** : vidéo en boucle (ambiance apéro entre copines) avec
+  une baseline éditoriale chaleureuse et un CTA unique.
+- **Écran d'auth — smart, à la Tinder** :
+  - Trois boutons empilés : **Google**, **Apple**, **Email** (logos
+    officiels respectant les brand guidelines).
+  - Pas de toggle "Créer un compte / Se connecter" en amont — on ne
+    demande pas à la fille de choisir avant de savoir si elle a déjà un
+    compte.
+  - Si elle choisit Google ou Apple : OAuth natif, le backend détecte
+    existant vs nouveau et branche automatiquement.
+  - Si elle choisit Email : on lui demande son email → on vérifie en
+    coulisses si un compte existe → on adapte le message suivant
+    (`Ravie de te revoir, Marguerite` vs `Crée ton mot de passe`).
+- La connexion sociale est la voie par défaut (moins de friction, meilleur
+  taux de conversion).
 
-### 2.2 Découverte et engagement (feed + discover)
+### 2.2 Onboarding (sign-up uniquement)
+
+Une fois le compte créé, on collecte en 4 étapes courtes :
+
+1. **Prénom** (requis) et **nom** (facultatif).
+2. **Ville** parmi les 5 villes (carte visuelle avec description
+   éditoriale).
+3. **Tranche d'âge**.
+4. **Centres d'intérêt** parmi les 7 catégories (Apéro, Sport, Atelier
+   créatif, Talk, Bien-être, Gastronomie, Sortie) — choix visuel via
+   grosses cards photo.
+
+Barre de progression affichée uniquement sur ces 4 étapes pour que
+l'onboarding reste rapide et perçu comme tel.
+
+### 2.3 Découverte et engagement (feed + discover)
 
 - **Accueil** : je vois un feed personnalisé de mes prochains rendez-vous
   dans ma ville, classés par pertinence par un algorithme de
@@ -81,7 +101,7 @@ avantages chez des partenaires locaux, et l'accès à l'annuaire des membres.
 - Je **bookmark** des événements qui m'intéressent (avec un cœur) et je peux
   les retrouver depuis mes favoris.
 
-### 2.3 Fiche événement et inscription
+### 2.4 Fiche événement et inscription
 
 - J'ouvre la page d'un événement : photo en grand, countdown ("Dans 3 jours",
   "Demain", "Dans 5h", "En cours"), titre, date/heure, adresse (avec carte
@@ -93,7 +113,7 @@ avantages chez des partenaires locaux, et l'accès à l'annuaire des membres.
 - Une fois inscrite, mon ticket (QR code) est accessible directement sur la
   page de l'événement — pas besoin d'un wallet séparé.
 
-### 2.4 Abonnement
+### 2.5 Abonnement
 
 - Sur toutes les surfaces où je suis limitée, je vois une invitation à
   rejoindre le club (card cream chaleureuse, non-agressive).
@@ -103,7 +123,7 @@ avantages chez des partenaires locaux, et l'accès à l'annuaire des membres.
 - Paiement récurrent géré par **Stripe Subscriptions** (carte, SEPA,
   Apple Pay, Google Pay).
 
-### 2.5 Bons plans (partenaires locaux)
+### 2.6 Bons plans (partenaires locaux)
 
 - Je vois une sélection éditoriale d'adresses dans ma ville : cafés,
   ateliers, restaurants, bien-être, fleuristes, librairies.
@@ -112,13 +132,13 @@ avantages chez des partenaires locaux, et l'accès à l'annuaire des membres.
   Déco, Atelier, Fleurs, Librairie).
 - Si je suis membre, je débloque un QR code à présenter en boutique.
 
-### 2.6 Les filles (annuaire)
+### 2.7 Les filles (annuaire)
 
 - Uniquement pour les membres : je découvre les profils des autres
   participantes de ma ville, je peux aller voir leur profil détaillé.
 - La page est en preview pour les non-membres (CTA paywall).
 
-### 2.7 Mon profil
+### 2.8 Mon profil
 
 - Photo, prénom, âge, ville, statut (membre du club/fidèle).
 - Parcours : niveau de fidélité basé sur le nombre d'événements participés
@@ -142,6 +162,115 @@ avantages chez des partenaires locaux, et l'accès à l'annuaire des membres.
 Chaque page d'onglet commence par un **hero éditorial** (gros titre Playfair
 avec accent italique terracotta, sous-titre discret). Pas de blocs colorés,
 pas d'icônes en rond coloré — l'ADN est magazine chaleureux.
+
+---
+
+## 3 bis — Modèle d'abonnement revisité (suggestion)
+
+> Je me suis permis de repenser le modèle économique. Tout est discutable
+> — on peut revenir à un abonnement mensuel simple si tu préfères.
+
+### Pourquoi un freemium + engagements longs ?
+
+Deux raisons business :
+
+1. **Adhérence.** Quelqu'un qui s'engage sur 3 ou 6 mois est statistiquement
+   beaucoup plus fidèle que quelqu'un qui résilie mensuellement. On lisse
+   le churn et on construit une vraie communauté, pas une liste d'inscrites
+   volatiles.
+2. **Trésorerie.** Les formules longues encaissent cash à la signature. 6
+   mois payés d'avance = 6 mois de CA disponibles pour payer les lieux,
+   rémunérer les manageuses de ville, faire de l'acquisition. C'est ce qui
+   différencie un business qui peut investir d'un business qui court
+   après les prélèvements mensuels.
+
+### Le freemium — Membre découverte (gratuit)
+
+Objectif : permettre à une fille de **goûter** à l'app sans barrière, tout
+en lui donnant envie de passer payante.
+
+**Ce qu'elle obtient** :
+
+- Accès à l'app complète (navigation, découverte, profil).
+- **1 événement par mois** au prix plein.
+- Lecture de la sélection "Bons Plans" (**QR code verrouillé**).
+- Preview de l'annuaire (**profils détaillés verrouillés**).
+- Notifications basiques (nouvel event dans sa ville).
+- Feed recommandé personnalisé.
+
+**Ce qui est limité / gated** :
+
+- Deuxième event du mois → paywall.
+- Pas de QR code partenaire actif.
+- Pas d'accès aux profils individuels des autres filles.
+- Pas de priorité sur les events populaires.
+- Pas d'events privés / exclusifs.
+
+### Les formules payantes — Membre du club
+
+Même périmètre de fonctionnalités quel que soit l'engagement, seul le prix
+au mois change selon la durée.
+
+| Formule | Prix total | Prix / mois | Économie |
+|---|---|---|---|
+| **Mensuel** (sans engagement) | 9,99 € | 9,99 € | — |
+| **3 mois** | 24,99 € | 8,33 € | −17 % |
+| **6 mois** | 39,99 € | 6,66 € | −33 % |
+
+Encaissement **en une fois** pour les formules 3 et 6 mois (trésorerie
+immédiate pour toi, meilleur deal pour la fille).
+
+**Ce que déverrouille n'importe quelle formule payante** :
+
+- Accès **illimité** aux événements (au prix membre).
+- **Prix membres** : −30 à −50 % par rapport au prix plein selon l'event.
+- **Tous les QR codes partenaires actifs** (Café Mokxa, Yoga Village,
+  Atelier Sézane, Le Skybar, La Maison Rose…).
+- **Annuaire complet** : accès aux profils détaillés des membres de la
+  ville, avec leur bio, leurs centres d'intérêt.
+- **Priorité d'inscription** (fenêtre de 48h avant ouverture au public sur
+  les events populaires).
+- Newsletter éditoriale bi-mensuelle.
+- Notifications prioritaires sur les nouvelles annonces.
+
+### Bonus fidélité — Membre fidèle
+
+Après **6 mois d'abonnement cumulé**, la fille passe automatiquement en
+statut "Fidèle" :
+
+- **Badge fidélité** visible sur son profil et dans l'annuaire.
+- **Événements exclusifs** "privés fidèles" une fois par trimestre.
+- **Early access** sur les partenaires premium (nouveaux spots, soirées
+  spéciales).
+- **Cadeau d'anniversaire** d'abonnement (partenariat local ou goodies).
+
+Ce statut n'a pas de surcoût — il récompense simplement la fidélité et
+crée une mécanique d'aspiration saine pour les nouvelles inscrites.
+
+### Tableau comparatif rapide
+
+| | **Découverte** (0 €) | **Club** (à partir de 6,66 €/mois) | **Fidèle** (après 6 mois) |
+|---|---|---|---|
+| Navigation, discover, feed reco | ✅ | ✅ | ✅ |
+| Bookmarks, favoris | ✅ | ✅ | ✅ |
+| Events / mois | 1 | Illimité | Illimité |
+| Prix membre sur les events | ❌ | ✅ | ✅ |
+| QR partenaires | ❌ | ✅ | ✅ |
+| Annuaire complet | ❌ | ✅ | ✅ |
+| Priorité d'inscription | ❌ | ✅ | ✅ |
+| Newsletter éditoriale | ❌ | ✅ | ✅ |
+| Events exclusifs | ❌ | ❌ | ✅ |
+| Badge fidélité | ❌ | ❌ | ✅ |
+| Cadeau d'anniversaire | ❌ | ❌ | ✅ |
+
+### Dans l'app, concrètement
+
+- Les **trois formules** s'affichent ensemble sur l'écran `/subscribe`, avec
+  la 6 mois mise en avant ("le plus choisi", économie soulignée).
+- La **résiliation** est possible en un clic depuis le profil (on n'est pas
+  là pour retenir les filles contre leur gré — ça protège la marque).
+- Les relances de fin d'engagement 3/6 mois sont gérées automatiquement
+  via **Brevo** (email J-7, J-2, J-0 avec proposition de renouvellement).
 
 ---
 
@@ -190,58 +319,120 @@ Droits **transverses et uniquement en modération** :
 
 ---
 
-## 5 — Algorithme de recommandation
+## 5 — L'intelligence derrière le feed
 
-L'onglet Accueil affiche un feed **personnalisé**, pas une liste
-chronologique. L'algorithme est un **content-based recommender** léger,
-basé sur une combinaison linéaire de signaux — le même pattern que les
-grandes libs open-source (Mahout, LensKit, LightFM) utilisent pour le
-cold-start.
+### C'est le cœur de l'app
 
-### 5.1 Signaux pris en compte
+Tous les produits concurrents (Meetup, Facebook Events, Eventbrite) te
+proposent une **liste**. Un calendrier. Un flux chronologique. Résultat :
+la fille scrolle, abandonne, et ne revient pas.
 
-- Les **centres d'intérêt** déclarés à l'onboarding.
-- Les **likes / bookmarks** sur des events.
-- Les **events passés** auxquels la fille a participé.
-- Les **events consultés** dans Discover (signal de curiosité).
-- Le **cercle social** dérivé des events partagés avec d'autres filles.
-- La **proximité géographique** (ville) et **temporelle** (< 14 jours).
-- L'**urgence** (taux de remplissage).
+Sur **Les Apéros Filles**, l'écran d'accueil n'est pas une liste — c'est
+une **sélection**. Un feed où chaque event qui remonte est là parce qu'on
+a une vraie raison de penser qu'il va te plaire. C'est ce qui transforme
+l'app d'un catalogue en un **petit concierge personnel**.
 
-### 5.2 Pondérations
+C'est ce qui va faire qu'une fille revient tous les jours plutôt qu'une
+fois par mois — et c'est ce qui va justifier son abonnement.
 
-Chaque signal a un poids transparent, ajustable depuis un seul endroit :
+### Ce que l'app apprend de toi
 
-| Signal | Poids |
-|---|---|
-| Intérêt déclaré | 3 |
-| Event passé (même catégorie) | 2 |
-| Bookmark (même catégorie) | 1,5 |
-| Event vu sur Discover | 0,5 |
-| Ville match | +2 |
-| Amie inscrite sur l'event | +0,8 |
-| Dans les 14 jours | +1 |
-| < 30 % de places restantes | +0,5 |
-| Déjà inscrite / bookmarkée | +100 (remontée garantie) |
+Sans jamais poser la question directement, l'app construit au fil du temps
+un **profil de goût** pour chaque fille. Elle écoute ce qu'on lui dit
+clairement, ce qu'on fait sans y penser, et ce qu'on laisse deviner.
 
-Les événements où la fille est déjà engagée remontent toujours en tête ; le
-reste est une vraie sélection.
+- **Ce que tu as coché à l'onboarding** — tes centres d'intérêt déclarés.
+  C'est le point de départ, mais c'est loin d'être le seul signal.
+- **Ce que tu regardes** — chaque event que tu ouvres, même sans
+  t'inscrire, compte comme un "hmm, ça m'intrigue".
+- **Ce que tu sauvegardes** — un bookmark, c'est une intention qui n'est
+  pas encore passée à l'action, mais qui compte fort.
+- **Ce à quoi tu vas** — les events auxquels tu es vraiment allée sont le
+  signal le plus fort : tu as voté avec tes pieds.
+- **Avec qui tu y vas** — si Camille, Léa et Sophie y vont, le feed
+  comprend que c'est ton cercle, et propose la prochaine sortie où elles
+  seront aussi.
+- **Où tu es** — les events de ta ville remontent, pas ceux d'ailleurs.
+- **Quand ça se passe** — un event imminent avec peu de places est
+  mécaniquement plus pertinent qu'un event dans trois mois.
 
-### 5.3 Pourquoi ce choix
+Chaque geste que fait la fille nourrit l'intelligence du feed, **en
+arrière-plan**. Elle n'a jamais l'impression d'être questionnée ou
+surveillée — juste d'avoir une app qui "la comprend".
 
-- **Zéro dépendance ML** → démarre dès le jour 1 sans attendre d'avoir de
-  la donnée.
-- **100 % transparent** → on peut expliquer à la fille pourquoi un event
-  remonte (« parce que tu aimes les apéros + Camille y va »).
-- **Évolutif** → on peut ajouter du collaborative filtering plus tard sans
-  changer l'API côté front.
+### Ce que ça produit concrètement
 
-### 5.4 Roadmap algo (post-V1)
+Deux exemples pour illustrer :
 
-- Explications dans l'UI ("Pour toi parce que…").
-- Decay temporel sur les anciens signaux.
-- Diversity re-rank (pas 5 apéros à la suite dans le feed).
-- Collaborative filtering hybride quand on a assez de traces.
+> **Exemple 1 — Léa, 26 ans, Lyon.**
+> Elle s'est inscrite en cochant "Atelier créatif" et "Bien-être". Depuis,
+> elle a assisté à 2 ateliers céramique, bookmarqué un yoga rooftop, et
+> passé 30 secondes sur la page d'un apéro galentines.
+>
+> Son feed ce lundi matin : d'abord un atelier parfum qui vient d'ouvrir
+> (match parfait sur "Atelier créatif" + 3 filles de sa liste y vont),
+> puis un yoga sunset (catégorie bookmarquée + places limitées), et enfin
+> un apéro rooftop à Lyon (signal faible mais son amie Camille y va).
+
+> **Exemple 2 — Marguerite, 32 ans, Rennes.**
+> Abonnée depuis 4 mois, elle va surtout à des talks et des apéros. Elle
+> n'a jamais fait de sport.
+>
+> Son feed ne lui proposera jamais un running à 7h du matin comme
+> premier event — même si le running est disponible à Rennes. L'app a
+> compris qu'elle préfère les ambiances feutrées. Le sport peut
+> apparaître plus bas, comme une ouverture discrète, jamais comme le
+> premier choix.
+
+### Comment c'est construit
+
+Sans entrer dans les détails tech : on a un **score** calculé pour chaque
+event à chaque rafraîchissement. Ce score additionne tous les signaux
+ci-dessus (intérêts déclarés, historique, cercle social, géographie,
+proximité temporelle, urgence). Le feed est trié par score décroissant.
+
+Trois principes ont guidé le design :
+
+1. **Transparent** — on peut expliquer à chaque fille pourquoi un event
+   remonte (« parce que tu aimes les apéros et que Camille y va »). Dans
+   la V2, on l'affichera sous la card.
+2. **Robuste dès le jour 1** — le système fonctionne même pour une
+   nouvelle inscrite sans historique (elle a ses intérêts déclarés + sa
+   ville, c'est déjà assez). Pas besoin d'attendre d'avoir des données.
+3. **Évolutif** — le moteur est conçu pour qu'on puisse l'enrichir sans
+   tout refaire. Quand on aura 10 000 filles sur l'app et des vraies
+   traces de comportement, on branchera des signaux plus sophistiqués
+   (« des filles qui te ressemblent ont aussi aimé… ») sans rien casser
+   côté front.
+
+### Pourquoi c'est essentiel pour le business
+
+Un feed personnalisé **change directement trois indicateurs clés** :
+
+- **Le taux de clic** → la fille ouvre plus de fiches events, donc
+  découvre plus de choses, donc s'inscrit plus.
+- **La rétention** → elle revient tous les jours parce qu'à chaque visite
+  le feed est frais et pertinent (vs. une liste statique qui ne change
+  pas).
+- **La conversion à l'abonnement** → dès qu'elle comprend que le feed la
+  "connaît", elle n'a plus envie de tester une autre app. C'est le
+  **moat** de Les Apéros Filles.
+
+C'est aussi ce qui justifie le prix membre : **on paye pour être dans un
+club qui nous comprend**, pas pour accéder à une liste qu'on pourrait
+consulter ailleurs gratuitement.
+
+### Roadmap après la V1
+
+- **Explications dans l'UI** — petite ligne sous chaque card : « Pour toi
+  parce que tu aimes les apéros + 2 copines y vont ».
+- **Vieillissement naturel** des anciens signaux — une activité d'il y a
+  deux ans ne pèse pas comme un bookmark de la semaine dernière.
+- **Diversité du feed** — éviter mécaniquement cinq apéros à la suite.
+- **Filtrage collaboratif** — quand on aura assez de filles, on ajoutera
+  « les filles qui te ressemblent ont aimé ça aussi ».
+
+Toutes ces évolutions se branchent sans recasser l'existant.
 
 ---
 
@@ -287,7 +478,30 @@ reste est une vraie sélection.
 
 ## 7 — Intégrations tierces
 
-### 7.1 Sanity CMS (gestion de contenu)
+### 7.1 Authentification (Google, Apple, Email)
+
+Un vrai système d'auth production-ready, pas un formulaire basique.
+
+- **Google Sign-In** via `expo-auth-session` + Google Identity Services.
+  OAuth natif iOS / Android, fallback redirect sur web. Les logos
+  officiels Google sont déjà intégrés dans l'app (SVG multicolore
+  respectant les brand guidelines).
+- **Sign in with Apple** — **obligatoire sur iOS** dès lors qu'on propose
+  Google ou Facebook (App Store Review Guidelines §4.8). Logo Apple
+  officiel intégré.
+- **Email / mot de passe** classique, avec possibilité d'ajouter un
+  **magic link** (lien sans mot de passe envoyé par email via Brevo).
+- **Détection intelligente des comptes existants** ("welcome back") — au
+  lieu de demander à la fille de choisir entre "Créer un compte" / "Se
+  connecter", on vérifie en coulisses si l'email qu'elle entre est connu
+  et on adapte la suite. Zéro friction, UX à la Tinder / Uber.
+- **Récupération de mot de passe** via email (Brevo).
+- **Sessions JWT** sécurisées, refresh token côté backend, rotation
+  automatique.
+- Option de **liaison multi-providers** : une fille qui s'est inscrite via
+  Google peut plus tard lier son email / Apple sans perdre son compte.
+
+### 7.2 Sanity CMS (gestion de contenu)
 
 - **3 workspaces** (un par rôle) avec schémas partagés mais permissions
   distinctes.
@@ -297,7 +511,7 @@ reste est une vraie sélection.
   manageuses ne soient pas dépaysées.
 - Publication via l'API GROQ → cache CDN côté front.
 
-### 7.2 Brevo (emails & notifications)
+### 7.3 Brevo (emails & notifications)
 
 - **Transactionnel** : confirmation d'inscription, reçu de paiement,
   rappel J-2 avant l'événement, confirmation d'abonnement, relance
@@ -310,7 +524,7 @@ reste est une vraie sélection.
 - **SMS** optionnel pour les rappels J-1 sur les events payants
   (engagement supérieur).
 
-### 7.3 Stripe (paiements)
+### 7.4 Stripe (paiements)
 
 - **Stripe Subscriptions** pour l'abonnement mensuel (9,99 €).
 - **Stripe Checkout** pour les tickets à l'unité.
@@ -320,14 +534,14 @@ reste est une vraie sélection.
   (paiement réussi, paiement échoué, résiliation).
 - Apple Pay / Google Pay activés pour le checkout.
 
-### 7.4 Maps
+### 7.5 Maps
 
 - **Mapbox** (plus joli que Google Maps pour notre DA) pour les cards
   statiques dans la fiche événement.
 - Ouverture native des applications de navigation côté device (Apple
   Maps, Google Maps, Waze) quand la fille clique sur l'adresse.
 
-### 7.5 Autres
+### 7.6 Autres
 
 - **Sentry** — monitoring erreurs.
 - **Plausible** (ou Mixpanel pour les events produit) — analytics.

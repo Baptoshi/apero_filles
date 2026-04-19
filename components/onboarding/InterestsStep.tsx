@@ -49,7 +49,7 @@ export function InterestsStep({ onComplete, onBack }: InterestsStepProps) {
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View style={styles.header}>
-            <Text style={styles.step}>Étape 3 sur 3</Text>
+            <Text style={styles.step}>Étape 4 sur 4</Text>
             <Text style={styles.title}>Tes centres d'intérêt&nbsp;?</Text>
             <Text style={styles.subtitle}>
               Choisis au moins deux univers qui te ressemblent. On s'occupe du

@@ -16,6 +16,10 @@ export type Interest =
 export interface User {
   id: string;
   firstName: string;
+  /** Captured during sign-up — optional to stay backward-compatible with seed data. */
+  lastName?: string;
+  /** Email collected at sign-up / sign-in. Optional on legacy records. */
+  email?: string;
   age: number;
   city: City;
   bio: string;

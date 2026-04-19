@@ -29,7 +29,7 @@ export function CityStep({ onNext, onBack }: CityStepProps) {
   return (
     <View style={styles.root}>
       <View style={styles.header}>
-        <Text style={styles.step}>Étape 1 sur 3</Text>
+        <Text style={styles.step}>Étape 2 sur 4</Text>
         <Text style={styles.title}>Tu es à quelle ville ?</Text>
         <Text style={styles.subtitle}>Pour te proposer les événements près de chez toi.</Text>
       </View>
