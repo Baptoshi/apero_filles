@@ -25,6 +25,15 @@ export interface EventPrice {
   savings: number;
   /** Whether a discount exists at all. */
   hasDiscount: boolean;
+
+  /** Formatted full price — always present, used for the "free tier" tease. */
+  priceFullLabel: string;
+  /** Formatted member price — always present, used for the "free tier" tease. */
+  priceMemberLabel: string;
+  /** Alias kept for the feed card's free variant (reads better at call site). */
+  strikethroughLabelFull: string;
+  /** Alias kept for the feed card's free variant. */
+  memberLabel: string;
 }
 
 function formatAmount(amount: number): string {
@@ -36,12 +45,19 @@ export function getEventPrice(event: Event, tier: MembershipTier): EventPrice {
   const hasDiscount = event.priceMember < event.priceFull;
   const amount = isMember ? event.priceMember : event.priceFull;
 
+  const priceFullLabel = formatAmount(event.priceFull);
+  const priceMemberLabel = formatAmount(event.priceMember);
+
   return {
     amount,
     label: formatAmount(amount),
-    strikethroughLabel: isMember && hasDiscount ? formatAmount(event.priceFull) : null,
-    memberHint: !isMember && hasDiscount ? `Membre ${formatAmount(event.priceMember)}` : null,
+    strikethroughLabel: isMember && hasDiscount ? priceFullLabel : null,
+    memberHint: !isMember && hasDiscount ? `Membre ${priceMemberLabel}` : null,
     savings: Math.max(event.priceFull - event.priceMember, 0),
     hasDiscount,
+    priceFullLabel,
+    priceMemberLabel,
+    strikethroughLabelFull: priceFullLabel,
+    memberLabel: priceMemberLabel,
   };
 }

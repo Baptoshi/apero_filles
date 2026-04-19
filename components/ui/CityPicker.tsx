@@ -1,5 +1,5 @@
 import { Check } from 'lucide-react-native';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { BottomSheet } from './BottomSheet';
 import { Colors } from '@/constants/colors';
@@ -27,8 +27,13 @@ export function CityPicker({ visible, selected, onClose, onSelect }: CityPickerP
   };
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} maxHeightRatio={0.6}>
-      <View style={styles.body}>
+    <BottomSheet visible={visible} onClose={onClose} maxHeightRatio={0.7}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.body}
+        showsVerticalScrollIndicator={false}
+        bounces
+      >
         <Text style={styles.eyebrow}>Ma ville</Text>
         <Text style={styles.title}>Choisis ta ville</Text>
 
@@ -54,12 +59,15 @@ export function CityPicker({ visible, selected, onClose, onSelect }: CityPickerP
             );
           })}
         </View>
-      </View>
+      </ScrollView>
     </BottomSheet>
   );
 }
 
 const styles = StyleSheet.create({
+  scroll: {
+    flexShrink: 1,
+  },
   body: {
     paddingTop: Spacing.sm,
     paddingBottom: Spacing.xl,

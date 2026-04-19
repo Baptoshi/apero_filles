@@ -3,15 +3,13 @@ import { useCallback, useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { CategoryScroll } from '@/components/discover/CategoryScroll';
 import { FeedCard } from '@/components/events/FeedCard';
+import { PageHero } from '@/components/layout/PageHero';
+import { ClubUpsellCard } from '@/components/subscription/ClubUpsellCard';
 import { CityPicker } from '@/components/ui/CityPicker';
-import { PillTag } from '@/components/ui/PillTag';
 import { SearchBar } from '@/components/ui/SearchBar';
-import {
-  CATEGORY_FILTERS,
-  categoryLabel,
-  type CategoryFilter,
-} from '@/constants/categories';
+import { type CategoryFilter } from '@/constants/categories';
 import { Colors } from '@/constants/colors';
 import { Spacing } from '@/constants/spacing';
 import { FontFamily, Typography } from '@/constants/typography';
@@ -24,9 +22,9 @@ import { isUpcoming } from '@/utils/date';
 /**
  * Discover — editorial title with an interactive city accent.
  *
- * The page filters the feed to the currently-selected city (persisted on the
- * user profile) and exposes category pills. The city name inside the title
- * is tappable and opens a small bottom-sheet picker.
+ * The title reads "Découvrir à <city>" on a single line; the city name is
+ * tappable and opens a small bottom-sheet picker. Below: search, category
+ * pills, an optional upsell, then a vertical feed of matching events.
  */
 export default function DiscoverScreen() {
   const router = useRouter();
@@ -47,8 +45,8 @@ export default function DiscoverScreen() {
     const q = query.trim().toLocaleLowerCase();
     return events
       .filter((event) => isUpcoming(event.date))
-      .filter((event) => (category === 'all' ? true : event.category === category))
       .filter((event) => event.city === city)
+      .filter((event) => (category === 'all' ? true : event.category === category))
       .filter((event) => {
         if (!q) return true;
         return (
@@ -93,25 +91,23 @@ export default function DiscoverScreen() {
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View>
-            <View style={styles.titleWrap}>
-              <Text style={styles.title}>
-                Découvrir à{' '}
-                <Pressable
-                  onPress={() => setCityPickerOpen(true)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Changer de ville — actuellement ${city}`}
-                >
-                  {({ pressed }) => (
-                    <Text style={[styles.cityAccent, pressed && styles.cityPressed]}>
-                      {city}
-                      <Text style={styles.cityChevron}> ⌄</Text>
-                    </Text>
-                  )}
-                </Pressable>
-              </Text>
-            </View>
+            <PageHero
+              title={
+                <Text>
+                  Découvrir à{'\n'}
+                  <Text
+                    style={styles.heroAccent}
+                    onPress={() => setCityPickerOpen(true)}
+                    suppressHighlighting
+                  >
+                    {city}
+                    <Text style={styles.heroChevron}>{' ⌄'}</Text>
+                  </Text>
+                </Text>
+              }
+            />
 
-            <View style={styles.controls}>
+            <View style={styles.searchWrap}>
               <SearchBar
                 value={query}
                 onChange={setQuery}
@@ -119,36 +115,14 @@ export default function DiscoverScreen() {
               />
             </View>
 
-            <FlatList
-              data={CATEGORY_FILTERS}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              keyExtractor={(item) => item}
-              contentContainerStyle={styles.filterList}
-              ItemSeparatorComponent={() => <View style={styles.filterSeparator} />}
-              renderItem={({ item }) => (
-                <PillTag
-                  label={categoryLabel(item)}
-                  selected={category === item}
-                  onPress={() => setCategory(item)}
-                />
-              )}
-              style={styles.filterRow}
-            />
+            <View style={styles.filterRow}>
+              <CategoryScroll selected={category} onSelect={setCategory} />
+            </View>
 
             {tier === 'free' ? (
-              <Pressable
-                onPress={() => router.push('/subscribe')}
-                accessibilityRole="link"
-                accessibilityLabel="Rejoindre le club pour profiter de prix réduits"
-                style={({ pressed }) => [styles.upsell, pressed && styles.upsellPressed]}
-              >
-                <Text style={styles.upsellEyebrow}>Rejoins le club</Text>
-                <Text style={styles.upsellBody}>
-                  Prix réduits sur tous les événements et accès à l'annuaire.
-                </Text>
-                <Text style={styles.upsellCta}>Voir les formules →</Text>
-              </Pressable>
+              <View style={styles.upsellWrap}>
+                <ClubUpsellCard onPress={() => router.push('/subscribe')} />
+              </View>
             ) : null}
           </View>
         }
@@ -156,7 +130,7 @@ export default function DiscoverScreen() {
           <View style={styles.empty}>
             <Text style={styles.emptyTitle}>Aucun événement à afficher</Text>
             <Text style={styles.emptyBody}>
-              Ajuste tes filtres ou repasse dans quelques jours — on ajoute de nouveaux
+              Ajuste tes filtres ou change de ville — on ajoute de nouveaux
               événements toutes les semaines.
             </Text>
           </View>
@@ -181,33 +155,19 @@ const styles = StyleSheet.create({
   listContent: {
     paddingBottom: Spacing.xxxl * 3,
   },
-  titleWrap: {
-    paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing.sm,
-    paddingBottom: Spacing.lg,
-  },
-  title: {
+  heroAccent: {
     fontFamily: FontFamily.display,
-    fontSize: 40,
-    lineHeight: 46,
-    color: Colors.text,
-    letterSpacing: -0.5,
-  },
-  cityAccent: {
-    fontFamily: FontFamily.display,
-    fontSize: 40,
-    lineHeight: 46,
+    fontSize: 38,
+    lineHeight: 44,
     color: Colors.accent,
     fontStyle: 'italic',
     letterSpacing: -0.5,
   },
-  cityChevron: {
+  heroChevron: {
     fontFamily: FontFamily.semiBold,
     color: Colors.accent,
-    fontSize: 28,
-  },
-  cityPressed: {
-    opacity: 0.6,
+    fontStyle: 'normal',
+    fontSize: 22,
   },
   cardWrap: {
     paddingHorizontal: Spacing.xl,
@@ -215,43 +175,17 @@ const styles = StyleSheet.create({
   listSeparator: {
     height: Spacing.lg,
   },
-  controls: {
+  searchWrap: {
     paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.xl,
     marginBottom: Spacing.md,
   },
   filterRow: {
     marginBottom: Spacing.xl,
   },
-  filterList: {
+  upsellWrap: {
     paddingHorizontal: Spacing.xl,
-  },
-  filterSeparator: {
-    width: Spacing.sm,
-  },
-  upsell: {
-    marginHorizontal: Spacing.xl,
     marginBottom: Spacing.xl,
-    paddingVertical: Spacing.lg,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: Colors.border,
-  },
-  upsellPressed: {
-    opacity: 0.6,
-  },
-  upsellEyebrow: {
-    ...Typography.label,
-    color: Colors.accent,
-    marginBottom: Spacing.xs,
-  },
-  upsellBody: {
-    ...Typography.body,
-    color: Colors.text,
-    marginBottom: Spacing.sm,
-  },
-  upsellCta: {
-    ...Typography.bodyBold,
-    color: Colors.accent,
   },
   empty: {
     marginHorizontal: Spacing.xl,

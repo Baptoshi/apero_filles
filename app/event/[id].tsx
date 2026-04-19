@@ -1,7 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ChevronRight } from 'lucide-react-native';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ImageBackground,
   Pressable,
@@ -29,6 +29,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AttendeesList } from '@/components/events/AttendeesList';
 import { ContactSheet } from '@/components/events/ContactSheet';
 import { EventActions } from '@/components/events/EventActions';
+import { EventMapCard } from '@/components/events/EventMapCard';
+import { FomoPill } from '@/components/events/FomoPill';
 import { PaymentSheet } from '@/components/events/PaymentSheet';
 import { TicketSheet } from '@/components/events/TicketSheet';
 import { Avatar } from '@/components/ui/Avatar';
@@ -41,8 +43,10 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useEventsStore } from '@/stores/useEventsStore';
 import type { Event } from '@/types/event';
 import { formatDatePieces, formatFullDate } from '@/utils/date';
+import { getEventFomoBadge } from '@/utils/fomo';
 import { getEventPrice } from '@/utils/price';
 import { buildEventSharePayload, sharePayload } from '@/utils/share';
+import { getMockWeather } from '@/utils/weather';
 
 /**
  * Event detail — Luma-inspired layout.
@@ -75,7 +79,14 @@ function EventDetail({ event }: { event: Event }) {
 
   const tier = useAuthStore((s) => s.tier);
   const ticket = useEventsStore((s) => s.getTicketForEvent(event.id));
+  const markViewed = useEventsStore((s) => s.markViewed);
   const actions = useEventActions(event);
+
+  // Record the view as an implicit interest signal for the Home recommender.
+  // Idempotent in the store, so running on every mount is cheap.
+  useEffect(() => {
+    markViewed(event.id);
+  }, [event.id, markViewed]);
 
   const [ticketVisible, setTicketVisible] = useState(false);
   const [contactVisible, setContactVisible] = useState(false);
@@ -130,6 +141,9 @@ function EventDetail({ event }: { event: Event }) {
   const price = useMemo(() => getEventPrice(event, tier), [event, tier]);
   const pieces = formatDatePieces(event.date);
   const tint = AvatarTints[event.imageGradient];
+  const weather = useMemo(() => getMockWeather(event.id), [event.id]);
+  const WeatherIcon = weather.icon;
+  const fomo = useMemo(() => getEventFomoBadge(event), [event]);
 
   const registerLabel =
     actions.registrationIntent.reason === 'tier-limit'
@@ -207,6 +221,12 @@ function EventDetail({ event }: { event: Event }) {
         </View>
 
         <View style={styles.body}>
+          {fomo ? (
+            <View style={styles.fomoRow}>
+              <FomoPill badge={fomo} />
+            </View>
+          ) : null}
+
           {actions.isRegistered ? (
             <Animated.View entering={FadeIn.duration(220)} style={styles.goingBadge}>
               <View style={styles.goingDot} />
@@ -219,12 +239,6 @@ function EventDetail({ event }: { event: Event }) {
           <HostRow city={event.city} />
 
           <Text style={styles.dateLine}>{formatFullDate(event.date)} · {event.time}</Text>
-          <Text style={styles.locationLine}>{event.location} — {event.city}</Text>
-          <Text style={styles.spotsLine}>
-            {event.spots > 0
-              ? `${event.spots} place${event.spots > 1 ? 's' : ''} disponible${event.spots > 1 ? 's' : ''}`
-              : 'Complet'}
-          </Text>
 
           <EventActions
             hasTicket={actions.isRegistered}
@@ -241,30 +255,52 @@ function EventDetail({ event }: { event: Event }) {
               onPress={() => router.push('/subscribe')}
               accessibilityRole="button"
               accessibilityLabel="Voir les formules d'abonnement"
-              style={({ pressed }) => [styles.savingsCard, pressed && styles.savingsPressed]}
+              style={({ pressed }) => [styles.savingsRow, pressed && styles.savingsPressed]}
             >
-              <View style={styles.savingsRow}>
-                <View style={styles.savingsAmountBlock}>
-                  <Text style={styles.savingsAmount}>-{price.savings}€</Text>
-                  <Text style={styles.savingsAmountLabel}>économie</Text>
-                </View>
-                <View style={styles.savingsText}>
-                  <Text style={styles.savingsEyebrow}>Avec l'abonnement</Text>
-                  <Text style={styles.savingsBody}>
-                    Membre {price.memberHint.replace('Membre ', '')} · non-membre {price.strikethroughLabel ?? `${event.priceFull}€`}
-                  </Text>
-                  <Text style={styles.savingsCta}>Voir les formules →</Text>
-                </View>
+              <View style={styles.savingsText}>
+                <Text style={styles.savingsLine}>
+                  <Text style={styles.savingsLineBold}>Économise {price.savings}€</Text>
+                  {' '}avec l'abonnement
+                </Text>
+                <Text style={styles.savingsSub}>
+                  Prix membre {price.memberHint.replace('Membre ', '')}
+                </Text>
               </View>
+              <Text style={styles.savingsArrow}>→</Text>
             </Pressable>
           ) : null}
 
-          <AttendeesList attendees={event.attendees} locked={tier === 'free'} />
+          <Section label="Lieu">
+            <View style={styles.locationRow}>
+              <View style={styles.locationText}>
+                <Text style={styles.locationTitle}>{event.location}</Text>
+                <Text style={styles.locationSub}>{event.city}</Text>
+              </View>
+              <View style={styles.weatherBlock}>
+                <WeatherIcon size={20} color={Colors.textSecondary} strokeWidth={1.6} />
+                <Text style={styles.weatherTemp}>{weather.temperature}</Text>
+              </View>
+            </View>
+            <View style={styles.mapWrap}>
+              <EventMapCard location={event.location} city={event.city} />
+            </View>
+          </Section>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitleItalic}>À propos</Text>
+          <Section label="Qui vient ?">
+            <AttendeesList attendees={event.attendees} locked={tier === 'free'} />
+          </Section>
+
+          <Section label="À propos">
             <Text style={styles.description}>{event.description}</Text>
-          </View>
+          </Section>
+
+          <Section label="Places">
+            <Text style={styles.spotsLine}>
+              {event.spots > 0
+                ? `${event.spots} place${event.spots > 1 ? 's' : ''} disponible${event.spots > 1 ? 's' : ''}`
+                : 'Complet'}
+            </Text>
+          </Section>
 
           {tier === 'free' ? (
             <View style={styles.limitCard}>
@@ -299,6 +335,22 @@ function EventDetail({ event }: { event: Event }) {
       />
       </Animated.View>
     </GestureDetector>
+  );
+}
+
+function Section({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <View style={styles.section}>
+      <View style={styles.sectionDivider} />
+      <Text style={styles.sectionLabel}>{label}</Text>
+      <View style={styles.sectionBody}>{children}</View>
+    </View>
   );
 }
 
@@ -470,6 +522,9 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.lg,
     gap: Spacing.lg,
   },
+  fomoRow: {
+    alignItems: 'flex-start',
+  },
   goingBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -526,70 +581,87 @@ const styles = StyleSheet.create({
     color: Colors.textTertiary,
     marginTop: -Spacing.sm,
   },
-  savingsCard: {
-    paddingVertical: Spacing.lg,
+  savingsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    paddingVertical: Spacing.md,
     borderTopWidth: 1,
     borderBottomWidth: 1,
     borderColor: Colors.border,
   },
   savingsPressed: {
-    opacity: 0.65,
-  },
-  savingsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.lg,
-  },
-  savingsAmountBlock: {
-    alignItems: 'center',
-  },
-  savingsAmount: {
-    fontFamily: FontFamily.display,
-    fontSize: 36,
-    lineHeight: 40,
-    color: Colors.accent,
-    letterSpacing: -0.8,
-    fontStyle: 'italic',
-  },
-  savingsAmountLabel: {
-    ...Typography.small,
-    color: Colors.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-    marginTop: 2,
+    opacity: 0.6,
   },
   savingsText: {
     flex: 1,
     gap: 2,
   },
-  savingsEyebrow: {
-    ...Typography.small,
-    color: Colors.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-  },
-  savingsBody: {
-    ...Typography.caption,
+  savingsLine: {
+    ...Typography.body,
     color: Colors.text,
-    marginTop: 2,
-    marginBottom: Spacing.xs,
   },
-  savingsCta: {
+  savingsLineBold: {
     ...Typography.bodyBold,
     color: Colors.accent,
   },
-  section: {
-    gap: Spacing.sm,
-    marginTop: Spacing.xxl,
+  savingsSub: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
   },
-  sectionTitleItalic: {
-    fontFamily: FontFamily.display,
-    fontSize: 24,
-    lineHeight: 28,
+  savingsArrow: {
+    ...Typography.bodyBold,
+    color: Colors.accent,
+    fontSize: 18,
+  },
+  section: {
+    marginTop: Spacing.xl,
+    gap: Spacing.md,
+  },
+  sectionDivider: {
+    height: 1,
+    backgroundColor: Colors.border,
+    marginBottom: Spacing.md,
+    marginHorizontal: -Spacing.xl,
+  },
+  sectionLabel: {
+    ...Typography.label,
+    color: Colors.textSecondary,
+  },
+  sectionBody: {
+    gap: Spacing.md,
+  },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: Spacing.md,
+  },
+  locationText: {
+    flex: 1,
+    gap: 2,
+  },
+  locationTitle: {
+    ...Typography.bodyBold,
     color: Colors.text,
-    letterSpacing: -0.3,
-    fontStyle: 'italic',
-    marginBottom: Spacing.xs,
+    fontSize: 17,
+    lineHeight: 22,
+  },
+  locationSub: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+  },
+  weatherBlock: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  weatherTemp: {
+    ...Typography.bodyBold,
+    color: Colors.textSecondary,
+  },
+  mapWrap: {
+    // spacing handled by parent gap
   },
   description: {
     ...Typography.body,

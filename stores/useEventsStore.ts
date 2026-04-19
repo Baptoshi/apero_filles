@@ -18,6 +18,12 @@ interface EventsState {
   events: Event[];
   bookmarks: Set<string>;
   registrations: Map<string, string>; // eventId -> ISO registration timestamp
+  /**
+   * Events the user has opened (from Discover, Home, deep links…). Used as a
+   * weak implicit signal by the recommendation engine — every category she
+   * opens bumps that category's taste weight.
+   */
+  viewed: Set<string>;
 
   getEventById: (id: string) => Event | undefined;
 
@@ -27,6 +33,9 @@ interface EventsState {
   register: (eventId: string) => void;
   unregister: (eventId: string) => void;
   isRegistered: (eventId: string) => boolean;
+
+  /** Record that the user has opened this event's detail page. Idempotent. */
+  markViewed: (eventId: string) => void;
 
   getBookmarked: () => Event[];
   getUpcomingForUser: (userId: string) => Event[];
@@ -59,6 +68,7 @@ export const useEventsStore = create<EventsState>((set, get) => ({
   events: mockEvents,
   bookmarks: initialBookmarks,
   registrations: new Map<string, string>(),
+  viewed: new Set<string>(),
 
   getEventById: (id) => get().events.find((event) => event.id === id),
 
@@ -92,6 +102,14 @@ export const useEventsStore = create<EventsState>((set, get) => ({
     }),
 
   isRegistered: (eventId) => get().registrations.has(eventId),
+
+  markViewed: (eventId) =>
+    set((state) => {
+      if (state.viewed.has(eventId)) return state;
+      const next = new Set(state.viewed);
+      next.add(eventId);
+      return { viewed: next };
+    }),
 
   getBookmarked: () => {
     const { events, bookmarks } = get();

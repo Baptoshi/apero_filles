@@ -1,17 +1,17 @@
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
-import { ChevronRight, Heart } from 'lucide-react-native';
-import { useMemo } from 'react';
+import { ChevronRight, Heart, MoreHorizontal } from 'lucide-react-native';
+import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { LoyaltyCard } from '@/components/profile/LoyaltyCard';
+import { SubscriptionSheet } from '@/components/profile/SubscriptionSheet';
 import { Avatar } from '@/components/ui/Avatar';
-import { Button } from '@/components/ui/Button';
 import { PillTag } from '@/components/ui/PillTag';
 import { Colors } from '@/constants/colors';
 import { IconSize, Radius, Spacing } from '@/constants/spacing';
-import { Typography } from '@/constants/typography';
+import { FontFamily, Typography } from '@/constants/typography';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useEventsStore } from '@/stores/useEventsStore';
 import type { MembershipTier } from '@/types/user';
@@ -23,14 +23,7 @@ const tierLabels: Record<MembershipTier, string> = {
   faithful: 'Membre fidèle',
 };
 
-const tierDescriptions: Record<MembershipTier, string> = {
-  free: "Profite d'un événement par mois au prix plein.",
-  member: 'Accès illimité aux événements à prix membre.',
-  faithful: 'Plus de 6 mois avec nous. Merci d’être là.',
-};
-
 export default function ProfileScreen() {
-  const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const tier = useAuthStore((s) => s.tier);
   const cycleTier = useAuthStore((s) => s.cycleTier);
@@ -41,6 +34,9 @@ export default function ProfileScreen() {
     [user],
   );
   const bookmarksCount = useEventsStore((s) => s.bookmarks.size);
+
+  const router = useRouter();
+  const [subscriptionOpen, setSubscriptionOpen] = useState(false);
 
   if (!user || !loyalty) {
     return null;
@@ -54,35 +50,43 @@ export default function ProfileScreen() {
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.hero}>
-          <Avatar
-            firstName={user.firstName}
-            gradient={user.avatarGradient}
-            photoUrl={user.avatarUrl}
-            tier={tier}
-            size={96}
-          />
-          <Text style={styles.name}>{user.firstName}</Text>
-          <Text style={styles.meta}>
-            {user.age} ans · {user.city}
-          </Text>
-          <PillTag label={tierLabels[tier]} variant="soft" style={styles.tierPill} />
-        </View>
+        <View style={styles.profileCard}>
+          <View style={styles.cover}>
+            <View style={styles.coverTopRow}>
+              <Text style={styles.coverEyebrow}>{tierLabels[tier]}</Text>
+              <Pressable
+                onPress={cycleTier}
+                accessibilityRole="button"
+                accessibilityLabel={`Mode dev — basculer de tier (actuellement ${tierLabels[tier]})`}
+                hitSlop={8}
+                style={({ pressed }) => [styles.moreBtn, pressed && styles.morePressed]}
+              >
+                <MoreHorizontal
+                  size={IconSize.content}
+                  color={Colors.accentContrast}
+                  strokeWidth={1.8}
+                />
+              </Pressable>
+            </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Abonnement</Text>
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>{tierLabels[tier]}</Text>
-            <Text style={styles.cardBody}>{tierDescriptions[tier]}</Text>
-            <Button
-              label={tier === 'free' ? 'Passe au niveau supérieur' : 'Gérer mon abonnement'}
-              variant={tier === 'free' ? 'primary' : 'secondary'}
-              onPress={() => router.push('/subscribe')}
-              accessibilityLabel={
-                tier === 'free' ? 'Découvrir les abonnements' : 'Gérer mon abonnement'
-              }
-              style={styles.cardCta}
-            />
+            <View style={styles.coverIdentity}>
+              <Text style={styles.identityName}>{user.firstName}</Text>
+              <Text style={styles.identityMeta}>
+                {user.age} ans · {user.city}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.avatarRow}>
+            <View style={styles.avatarRing}>
+              <Avatar
+                firstName={user.firstName}
+                gradient={user.avatarGradient}
+                photoUrl={user.avatarUrl}
+                tier={tier}
+                size={88}
+              />
+            </View>
           </View>
         </View>
 
@@ -140,14 +144,37 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        <Pressable
-          onPress={logout}
-          accessibilityRole="button"
-          accessibilityLabel="Se déconnecter"
-          style={styles.logoutRow}
-        >
-          <Text style={styles.logoutText}>Se déconnecter</Text>
-        </Pressable>
+        <View style={styles.accountFooter}>
+          <Pressable
+            onPress={() => setSubscriptionOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel={
+              tier === 'free' ? 'Voir mon abonnement' : 'Gérer mon abonnement'
+            }
+            style={({ pressed }) => [
+              styles.accountAction,
+              pressed && styles.accountActionPressed,
+            ]}
+          >
+            <Text style={styles.accountActionLabel}>
+              {tier === 'free' ? 'Mon abonnement' : 'Gérer mon abonnement'}
+            </Text>
+          </Pressable>
+
+          <View style={styles.accountDivider} />
+
+          <Pressable
+            onPress={logout}
+            accessibilityRole="button"
+            accessibilityLabel="Se déconnecter"
+            style={({ pressed }) => [
+              styles.accountAction,
+              pressed && styles.accountActionPressed,
+            ]}
+          >
+            <Text style={styles.logoutText}>Se déconnecter</Text>
+          </Pressable>
+        </View>
 
         {/* Long-press on the version to cycle through free / member / faithful */}
         <Pressable
@@ -162,6 +189,13 @@ export default function ProfileScreen() {
           </Text>
         </Pressable>
       </ScrollView>
+
+      <SubscriptionSheet
+        visible={subscriptionOpen}
+        onClose={() => setSubscriptionOpen(false)}
+        tier={tier}
+        memberSince={user.memberSince}
+      />
     </SafeAreaView>
   );
 }
@@ -169,8 +203,17 @@ export default function ProfileScreen() {
 function StatTile({ value, label }: { value: string; label: string }) {
   return (
     <View style={styles.statTile}>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
+      <Text
+        style={styles.statValue}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.75}
+      >
+        {value}
+      </Text>
+      <Text style={styles.statLabel} numberOfLines={1}>
+        {label}
+      </Text>
     </View>
   );
 }
@@ -196,23 +239,69 @@ const styles = StyleSheet.create({
   scroll: {
     paddingBottom: Spacing.xxxl * 3,
   },
-  hero: {
-    alignItems: 'center',
+  profileCard: {
     paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.md,
+  },
+  cover: {
+    minHeight: 200,
+    borderRadius: Radius.xl,
+    backgroundColor: Colors.accent,
+    paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.lg,
+    paddingBottom: Spacing.xl,
+    justifyContent: 'space-between',
   },
-  name: {
-    ...Typography.h1,
-    color: Colors.text,
-    marginTop: Spacing.md,
+  coverTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  meta: {
-    ...Typography.body,
-    color: Colors.textSecondary,
-    marginTop: 2,
+  coverEyebrow: {
+    ...Typography.small,
+    color: Colors.accentContrast,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    opacity: 0.85,
   },
-  tierPill: {
-    marginTop: Spacing.md,
+  moreBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  morePressed: {
+    opacity: 0.7,
+  },
+  coverIdentity: {
+    paddingLeft: 112,
+    gap: 2,
+  },
+  identityName: {
+    fontFamily: FontFamily.display,
+    fontSize: 26,
+    lineHeight: 30,
+    color: Colors.accentContrast,
+    letterSpacing: -0.3,
+  },
+  identityMeta: {
+    ...Typography.caption,
+    color: Colors.accentContrast,
+    opacity: 0.85,
+  },
+  avatarRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    paddingLeft: Spacing.lg,
+    marginTop: -52,
+  },
+  avatarRing: {
+    padding: 4,
+    borderRadius: 50,
+    backgroundColor: Colors.background,
   },
   section: {
     paddingHorizontal: Spacing.xl,
@@ -222,26 +311,6 @@ const styles = StyleSheet.create({
     ...Typography.label,
     color: Colors.textSecondary,
     marginBottom: Spacing.md,
-  },
-  card: {
-    padding: Spacing.lg,
-    backgroundColor: Colors.surface,
-    borderRadius: Radius.lg,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  cardTitle: {
-    ...Typography.h3,
-    color: Colors.text,
-    marginBottom: Spacing.xs,
-  },
-  cardBody: {
-    ...Typography.body,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.lg,
-  },
-  cardCta: {
-    alignSelf: 'stretch',
   },
   statsRow: {
     flexDirection: 'row',
@@ -253,13 +322,19 @@ const styles = StyleSheet.create({
     borderRadius: Radius.lg,
     borderWidth: 1,
     borderColor: Colors.border,
-    padding: Spacing.md,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.sm,
     alignItems: 'center',
+    justifyContent: 'flex-start',
+    gap: 2,
   },
   statValue: {
-    ...Typography.h2,
+    fontFamily: FontFamily.display,
+    fontSize: 22,
+    lineHeight: 26,
+    letterSpacing: -0.3,
     color: Colors.text,
-    marginBottom: 2,
+    textAlign: 'center',
   },
   statLabel: {
     ...Typography.small,
@@ -322,10 +397,34 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: Colors.border,
   },
-  logoutRow: {
+  accountFooter: {
     marginTop: Spacing.xl,
-    alignItems: 'center',
+    marginHorizontal: Spacing.xl,
+    paddingVertical: Spacing.xs,
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    justifyContent: 'center',
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: Colors.border,
+  },
+  accountAction: {
+    flex: 1,
     paddingVertical: Spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  accountActionPressed: {
+    opacity: 0.55,
+  },
+  accountActionLabel: {
+    ...Typography.bodyBold,
+    color: Colors.text,
+  },
+  accountDivider: {
+    width: 1,
+    backgroundColor: Colors.border,
+    marginVertical: Spacing.sm,
   },
   logoutText: {
     ...Typography.bodyBold,

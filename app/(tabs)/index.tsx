@@ -1,18 +1,22 @@
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { Bell } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FeedCard } from '@/components/events/FeedCard';
-import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import { NotificationsSheet } from '@/components/home/NotificationsSheet';
+import { PageHero } from '@/components/layout/PageHero';
+import { ClubUpsellCard } from '@/components/subscription/ClubUpsellCard';
 import { Colors } from '@/constants/colors';
-import { Spacing } from '@/constants/spacing';
-import { Typography } from '@/constants/typography';
+import { IconSize, Spacing } from '@/constants/spacing';
+import { FontFamily, Typography } from '@/constants/typography';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useEventsStore } from '@/stores/useEventsStore';
 import type { Event } from '@/types/event';
 import { isUpcoming } from '@/utils/date';
+import { buildFriendIds, rankEvents } from '@/utils/recommendations';
 
 type Tab = 'upcoming' | 'past';
 
@@ -31,39 +35,67 @@ export default function HomeScreen() {
   const events = useEventsStore((s) => s.events);
   const bookmarks = useEventsStore((s) => s.bookmarks);
   const registrations = useEventsStore((s) => s.registrations);
+  const viewed = useEventsStore((s) => s.viewed);
   const toggleBookmark = useEventsStore((s) => s.toggleBookmark);
 
   const [tab, setTab] = useState<Tab>('upcoming');
+  const [notifsOpen, setNotifsOpen] = useState(false);
 
   /**
-   * An event belongs to the user's personal list when:
-   *   - they are an attendee, OR
-   *   - they have registered for it via the store, OR
-   *   - they have bookmarked it (upcoming only — past bookmarks are less relevant).
+   * The "À venir" tab is a ranked, personalised feed rather than a chrono
+   * list of committed events. We:
+   *   1. Gather signals (past attended, bookmarked, viewed on discover,
+   *      registrations, declared interests).
+   *   2. Hand them to the content-based recommender (`utils/recommendations`).
+   *   3. Let the scoring engine hoist the user's committed events to the top
+   *      and fill the rest with matching recommendations.
+   *
+   * "Passés" stays chronological — it's a personal rétro, not a feed.
    */
   const myEvents = useMemo(() => {
     if (!user) return { upcoming: [] as Event[], past: [] as Event[] };
 
-    const isMine = (event: Event) =>
+    const isAttendingOrRegistered = (event: Event) =>
       event.attendees.some((attendee) => attendee.id === user.id) ||
-      registrations.has(event.id) ||
-      bookmarks.has(event.id);
+      registrations.has(event.id);
 
-    const upcoming = events
-      .filter((event) => isUpcoming(event.date) && isMine(event))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-    const past = events
-      .filter(
-        (event) =>
-          !isUpcoming(event.date) &&
-          (event.attendees.some((attendee) => attendee.id === user.id) ||
-            registrations.has(event.id)),
-      )
+    const pastAttended = events
+      .filter((event) => !isUpcoming(event.date) && isAttendingOrRegistered(event))
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-    return { upcoming, past };
-  }, [events, user, registrations, bookmarks]);
+    const bookmarkedEvents = events.filter((event) => bookmarks.has(event.id));
+    const viewedEvents = events.filter((event) => viewed.has(event.id));
+    const committedIds = new Set<string>([
+      ...registrations.keys(),
+      ...bookmarks,
+      ...events
+        .filter((event) => event.attendees.some((a) => a.id === user.id))
+        .map((event) => event.id),
+    ]);
+
+    const friendIds = buildFriendIds(user.id, [
+      ...pastAttended,
+      ...bookmarkedEvents,
+    ]);
+
+    // Scope the home feed to the user's city — Discover is the place to
+    // explore nationwide. Keeps the meta count ("X à venir") meaningful.
+    const upcomingCandidates = events.filter(
+      (event) => isUpcoming(event.date) && event.city === user.city,
+    );
+
+    const upcoming = rankEvents(upcomingCandidates, {
+      user,
+      interests: user.interests,
+      attendedEvents: pastAttended,
+      bookmarkedEvents,
+      viewedEvents,
+      committedIds,
+      friendIds,
+    });
+
+    return { upcoming, past: pastAttended };
+  }, [events, user, registrations, bookmarks, viewed]);
 
   const data = tab === 'upcoming' ? myEvents.upcoming : myEvents.past;
 
@@ -82,16 +114,88 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
         ListHeaderComponent={
-          <View style={styles.header}>
-            <SegmentedControl
-              value={tab}
-              onChange={setTab}
-              options={[
-                { value: 'upcoming', label: 'À venir' },
-                { value: 'past', label: 'Passés' },
-              ]}
-              style={styles.segment}
+          <View>
+            <PageHero
+              eyebrow={
+                <Text style={styles.greeting}>
+                  Bonjour,{' '}
+                  <Text style={styles.greetingName}>
+                    {user?.firstName ?? ''}
+                  </Text>
+                </Text>
+              }
+              accessory={
+                <Pressable
+                  onPress={() => setNotifsOpen(true)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Notifications"
+                  hitSlop={8}
+                  style={({ pressed }) => [
+                    styles.bellBtn,
+                    pressed && styles.bellPressed,
+                  ]}
+                >
+                  <Bell
+                    size={IconSize.content}
+                    color={Colors.text}
+                    strokeWidth={1.8}
+                  />
+                  <View style={styles.bellBadge} />
+                </Pressable>
+              }
+              title={
+                <Text>
+                  Tes{'\n'}
+                  <Text style={styles.heroAccent}>événements</Text>
+                </Text>
+              }
+              subtitle={
+                tab === 'upcoming'
+                  ? 'Sélectionnés selon tes préférences.'
+                  : 'Les moments déjà partagés.'
+              }
             />
+
+            <View style={styles.tabsRow}>
+              {(
+                [
+                  { value: 'upcoming', label: 'À venir' },
+                  { value: 'past', label: 'Passés' },
+                ] as const
+              ).map((opt) => {
+                const isActive = tab === opt.value;
+                return (
+                  <Pressable
+                    key={opt.value}
+                    onPress={() => setTab(opt.value)}
+                    accessibilityRole="tab"
+                    accessibilityLabel={opt.label}
+                    accessibilityState={{ selected: isActive }}
+                    style={({ pressed }) => [
+                      styles.tab,
+                      pressed && styles.tabPressed,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.tabLabel,
+                        isActive ? styles.tabLabelActive : styles.tabLabelIdle,
+                      ]}
+                    >
+                      {opt.label}
+                    </Text>
+                    <View
+                      style={[
+                        styles.tabUnderline,
+                        isActive
+                          ? styles.tabUnderlineActive
+                          : styles.tabUnderlineIdle,
+                      ]}
+                    />
+                  </Pressable>
+                );
+              })}
+            </View>
           </View>
         }
         renderItem={({ item }) => (
@@ -131,18 +235,16 @@ export default function HomeScreen() {
         }
         ListFooterComponent={
           tier === 'free' && tab === 'upcoming' ? (
-            <Pressable
-              onPress={() => router.push('/subscribe')}
-              accessibilityRole="button"
-              accessibilityLabel="Découvrir les formules"
-              style={({ pressed }) => [styles.upsell, pressed && styles.upsellPressed]}
-            >
-              <Text style={styles.upsellEyebrow}>Rejoins le club</Text>
-              <Text style={styles.upsellTitle}>Prix réduits, bons plans, annuaire.</Text>
-              <Text style={styles.upsellCta}>Voir les formules →</Text>
-            </Pressable>
+            <View style={styles.upsellWrap}>
+              <ClubUpsellCard onPress={() => router.push('/subscribe')} />
+            </View>
           ) : null
         }
+      />
+
+      <NotificationsSheet
+        visible={notifsOpen}
+        onClose={() => setNotifsOpen(false)}
       />
     </SafeAreaView>
   );
@@ -156,14 +258,81 @@ const styles = StyleSheet.create({
   listContent: {
     paddingBottom: Spacing.xxxl * 3,
   },
-  header: {
-    paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing.md,
-    paddingBottom: Spacing.xl,
-    alignItems: 'center',
+  tabsRow: {
+    flexDirection: 'row',
+    marginTop: Spacing.sm,
+    marginBottom: Spacing.lg,
   },
-  segment: {
-    alignSelf: 'center',
+  tab: {
+    flex: 1,
+    alignItems: 'center',
+    paddingTop: Spacing.md,
+  },
+  tabPressed: {
+    opacity: 0.6,
+  },
+  tabLabel: {
+    ...Typography.bodyBold,
+    paddingBottom: Spacing.sm + 2,
+  },
+  tabLabelActive: {
+    color: Colors.text,
+  },
+  tabLabelIdle: {
+    color: Colors.textTertiary,
+  },
+  tabUnderline: {
+    height: 2,
+    alignSelf: 'stretch',
+  },
+  tabUnderlineActive: {
+    backgroundColor: Colors.accent,
+  },
+  tabUnderlineIdle: {
+    backgroundColor: Colors.border,
+  },
+  heroAccent: {
+    fontStyle: 'italic',
+    color: Colors.accent,
+  },
+  greeting: {
+    ...Typography.body,
+    color: Colors.textSecondary,
+  },
+  greetingName: {
+    fontFamily: FontFamily.display,
+    fontStyle: 'italic',
+    color: Colors.accent,
+    fontSize: 16,
+  },
+  bellBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    shadowColor: Colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 1,
+  },
+  bellPressed: {
+    opacity: 0.65,
+  },
+  bellBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.accent,
+    borderWidth: 1.5,
+    borderColor: Colors.surface,
   },
   separator: {
     height: Spacing.lg,
@@ -199,28 +368,8 @@ const styles = StyleSheet.create({
     ...Typography.bodyBold,
     color: Colors.accent,
   },
-  upsell: {
-    marginTop: Spacing.xxxl,
-    marginHorizontal: Spacing.xl,
-    paddingVertical: Spacing.xl,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-  },
-  upsellPressed: {
-    opacity: 0.6,
-  },
-  upsellEyebrow: {
-    ...Typography.label,
-    color: Colors.accent,
-    marginBottom: Spacing.xs,
-  },
-  upsellTitle: {
-    ...Typography.h2,
-    color: Colors.text,
-    marginBottom: Spacing.md,
-  },
-  upsellCta: {
-    ...Typography.bodyBold,
-    color: Colors.accent,
+  upsellWrap: {
+    marginTop: Spacing.xxl,
+    paddingHorizontal: Spacing.xl,
   },
 });

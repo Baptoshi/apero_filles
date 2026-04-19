@@ -1,14 +1,15 @@
 import { mockPartners } from '@/data/mock';
 import type { Partner } from '@/types/partner';
-import type { Deal, Ticket } from '@/types/wallet';
+import type { Deal } from '@/types/wallet';
 import type { City, MembershipTier } from '@/types/user';
 
 /**
- * Wallet aggregation helpers.
+ * Bons Plans aggregation helpers.
  *
- * Deals are derived from the partners list rather than stored — they become
- * "available" as soon as a user is a member (or faithful). This keeps the free-tier
- * preview (cards visible, QR locked) trivial to implement.
+ * The "wallet" surface only hosts partner deals — event tickets live on the
+ * event detail page itself (via `TicketSheet`), not in a wallet list. Deals
+ * are derived on-the-fly from the partners catalog so the free-tier preview
+ * (cards visible, QR locked) stays trivial to implement.
  */
 
 function buildDeal(partner: Partner): Deal {
@@ -27,20 +28,19 @@ export function getDealsForCity(city: City | 'all'): Deal[] {
 }
 
 /**
- * True when the membership lets the user actually redeem the deal / ticket.
+ * True when the membership lets the user actually redeem the deal.
  * Free tier previews deals but sees a locked QR.
  */
 export function canRedeem(tier: MembershipTier): boolean {
   return tier !== 'free';
 }
 
-export type WalletItem =
-  | { kind: 'ticket'; id: string; ticket: Ticket }
-  | { kind: 'deal'; id: string; deal: Deal };
-
-export function toTicketItem(ticket: Ticket): WalletItem {
-  return { kind: 'ticket', id: ticket.id, ticket };
-}
+/**
+ * A single entry displayed on the Bons Plans screen. Kept as a discriminated
+ * union for forward-compat (if we ever add another kind), but today only
+ * `deal` is rendered — tickets don't live here.
+ */
+export type WalletItem = { kind: 'deal'; id: string; deal: Deal };
 
 export function toDealItem(deal: Deal): WalletItem {
   return { kind: 'deal', id: deal.id, deal };

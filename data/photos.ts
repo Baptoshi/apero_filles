@@ -36,6 +36,51 @@ export const USER_PHOTOS: Record<string, string> = {
   u20: unsplash('1502767089025-6572583495b4', 200),
 };
 
+/**
+ * City hero photos for the Discover → "Nos villes" section.
+ * Square/landscape crops, around 700px wide.
+ */
+export const CITY_PHOTOS: Record<string, string> = {
+  Lyon: unsplash('1524396309943-e03f5249f002', 700),
+  Marseille: unsplash('1603796855050-d9a12c097bb1', 700),
+  Toulouse: unsplash('1581833971358-2c8b550f87b3', 700),
+  Montpellier: unsplash('1615967999430-efde0c6395f7', 700),
+  Rennes: unsplash('1607920592519-bab2a4e0d362', 700),
+};
+
+/**
+ * Interest cover photos for the onboarding — editorial lifestyle shots
+ * matched to each interest category. Square-ish crops, ~700px wide.
+ */
+export const INTEREST_PHOTOS: Record<string, string> = {
+  'Apéro': unsplash('1528825871115-3581a5387919', 700), // bar glasses
+  'Sport': unsplash('1518611012118-696072aa579a', 700), // running
+  'Atelier créatif': unsplash('1565193566173-7a0ee3dbe261', 700), // pottery
+  'Talk': unsplash('1540575467063-178a50c2df87', 700), // speaker mic
+  'Bien-être': unsplash('1545205597-3d9d02c29597', 700), // yoga mat
+  'Gastronomie': unsplash('1533089860892-a7c6f0a88666', 700), // brunch flowers
+  'Sortie': unsplash('1519671482749-fd09be7ccebf', 700), // rooftop night
+};
+
+/**
+ * Partner cover photos for the Wallet → Bons plans list.
+ * Editorial lifestyle shots (café, yoga, flatlays) in a warm palette.
+ */
+export const PARTNER_PHOTOS: Record<string, string> = {
+  p1: unsplash('1495474472287-4d71bcdd2085', 900), // café mokxa — coffee + books
+  p2: unsplash('1545205597-3d9d02c29597', 900), // yoga village — yoga mat
+  p3: unsplash('1483985988355-763728e1935b', 900), // sézane — clothing rack
+  p4: unsplash('1519671482749-fd09be7ccebf', 900), // skybar — rooftop cocktails
+  p5: unsplash('1555396273-367ea4eb4db5', 900), // la maison rose — plated dessert
+  p6: unsplash('1551024601-bec78aea704b', 900), // le shake — cocktail making
+  p7: unsplash('1513519245088-0e12902e5a38', 900), // concept store — ceramics / linen
+  p8: unsplash('1600334129128-685c5582fd35', 900), // spa — warm stones
+  p9: unsplash('1487530811176-3780de880c2d', 900), // floral atelier — bouquets
+  p10: unsplash('1507842217343-583bb7270b66', 900), // bookshop — shelves
+  p11: unsplash('1565193566173-7a0ee3dbe261', 900), // ceramic studio — pottery wheel
+  p12: unsplash('1509042239860-f550ce710b93', 900), // café patisserie — pastries
+};
+
 export const EVENT_PHOTOS: Record<string, string> = {
   e1: unsplash('1528825871115-3581a5387919', 900), // apéro bar
   e2: unsplash('1552674605-db6ffd4facb5', 900), // morning run

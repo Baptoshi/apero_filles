@@ -1,12 +1,11 @@
 import { Lock } from 'lucide-react-native';
 import { memo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Colors } from '@/constants/colors';
-import { IconSize, Spacing } from '@/constants/spacing';
+import { IconSize, Radius, Spacing } from '@/constants/spacing';
 import { FontFamily, Typography } from '@/constants/typography';
 import type { Deal } from '@/types/wallet';
-import { formatShortDate } from '@/utils/date';
 
 interface WalletCardProps {
   deal: Deal;
@@ -15,11 +14,12 @@ interface WalletCardProps {
 }
 
 /**
- * Deal card — magazine-classifieds style.
+ * Editorial deal card — thumbnail on the left, typographic stack on the right.
  *
- * No border, no background fill — the card is a purely typographic block.
- * The Wallet screen uses hairlines between items to give the list its
- * editorial rhythm, keeping the surface layer-free.
+ * The photo grounds the deal (place / mood) while the text keeps the magazine
+ * feel: small uppercase meta line, Playfair name, offer + neighborhood. The
+ * lock indicator is inlined in the meta row so free members still see the
+ * full listing, just without the QR.
  */
 function WalletCardComponent({ deal, locked, onPress }: WalletCardProps) {
   const { partner } = deal;
@@ -31,26 +31,32 @@ function WalletCardComponent({ deal, locked, onPress }: WalletCardProps) {
       accessibilityLabel={`${partner.name} — ${partner.offer}`}
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}
     >
-      <View style={styles.header}>
-        <Text style={styles.eyebrow}>
-          {partner.category.toUpperCase()} · {partner.city.toUpperCase()}
-        </Text>
-        {locked ? (
-          <View style={styles.lockInline}>
-            <Lock size={IconSize.inline} color={Colors.textTertiary} strokeWidth={1.8} />
-            <Text style={styles.lockLabel}>Membres</Text>
-          </View>
-        ) : null}
-      </View>
+      {partner.imageUrl ? (
+        <Image source={{ uri: partner.imageUrl }} style={styles.thumb} />
+      ) : (
+        <View style={[styles.thumb, styles.thumbFallback]} />
+      )}
 
-      <Text style={styles.title}>{partner.name}</Text>
-
-      <View style={styles.metaRow}>
-        <Text style={styles.offer}>{partner.offer}</Text>
-        <Text style={styles.dot}>·</Text>
-        <Text style={styles.validity}>
-          Jusqu'au {formatShortDate(partner.validUntil)}
+      <View style={styles.body}>
+        <Text style={styles.eyebrow} numberOfLines={1}>
+          {partner.category}
+          {partner.area ? ` · ${partner.area}` : ''}
         </Text>
+
+        <Text style={styles.title} numberOfLines={1}>
+          {partner.name}
+        </Text>
+
+        <View style={styles.metaRow}>
+          <Text style={styles.offer} numberOfLines={1}>
+            {partner.offer}
+          </Text>
+          {locked ? (
+            <View style={styles.lockInline}>
+              <Lock size={IconSize.inline} color={Colors.textTertiary} strokeWidth={1.8} />
+            </View>
+          ) : null}
+        </View>
       </View>
     </Pressable>
   );
@@ -60,17 +66,26 @@ export const WalletCard = memo(WalletCardComponent);
 
 const styles = StyleSheet.create({
   card: {
-    paddingVertical: Spacing.lg,
-    gap: Spacing.xs,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    paddingVertical: Spacing.md,
   },
   pressed: {
-    opacity: 0.6,
+    opacity: 0.65,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.xs,
+  thumb: {
+    width: 78,
+    height: 78,
+    borderRadius: Radius.md,
+    backgroundColor: Colors.surfaceMuted,
+  },
+  thumbFallback: {
+    backgroundColor: Colors.surfaceMuted,
+  },
+  body: {
+    flex: 1,
+    gap: 2,
   },
   eyebrow: {
     ...Typography.small,
@@ -78,42 +93,29 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.8,
   },
-  lockInline: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  lockLabel: {
-    ...Typography.small,
-    color: Colors.textTertiary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-  },
   title: {
     fontFamily: FontFamily.display,
-    fontSize: 26,
-    lineHeight: 30,
+    fontSize: 20,
+    lineHeight: 24,
     color: Colors.text,
-    letterSpacing: -0.4,
-    fontStyle: 'italic',
+    letterSpacing: -0.3,
+    marginTop: 2,
   },
   metaRow: {
     flexDirection: 'row',
-    alignItems: 'baseline',
-    flexWrap: 'wrap',
+    alignItems: 'center',
     gap: Spacing.xs,
     marginTop: 2,
   },
   offer: {
-    ...Typography.body,
-    color: Colors.text,
-  },
-  dot: {
     ...Typography.caption,
-    color: Colors.textTertiary,
+    color: Colors.textSecondary,
+    flexShrink: 1,
   },
-  validity: {
-    ...Typography.caption,
-    color: Colors.textTertiary,
+  lockInline: {
+    width: 18,
+    height: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

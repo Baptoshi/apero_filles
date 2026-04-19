@@ -7,7 +7,7 @@ import { QRCode } from '@/components/ui/QRCode';
 import { Colors } from '@/constants/colors';
 import { IconSize, Radius, Spacing } from '@/constants/spacing';
 import { FontFamily, Typography } from '@/constants/typography';
-import { formatFullDate, formatShortDate } from '@/utils/date';
+import { formatShortDate } from '@/utils/date';
 import type { WalletItem } from '@/utils/wallet';
 
 interface WalletDetailSheetProps {
@@ -18,13 +18,11 @@ interface WalletDetailSheetProps {
 }
 
 /**
- * Detail sheet for a wallet item.
+ * Detail sheet for a Bons Plans entry (partner deal).
  *
- *   - Deal  → editorial layout (eyebrow / Playfair title / offer / QR or lock)
- *   - Ticket → event title + QR + date + place (mirrors the deal structure)
- *
- * No duplicated info, no framed "details" cards — just clean flowing copy
- * with a single QR block in the middle.
+ * Editorial layout: eyebrow / Playfair title / offer / QR (or lock panel for
+ * free users). Tickets are shown elsewhere — they live on the event detail
+ * page via `TicketSheet`.
  */
 export function WalletDetailSheet({
   visible,
@@ -48,26 +46,6 @@ function DetailBody({
   locked: boolean;
   onClose: () => void;
 }) {
-  if (item.kind === 'ticket') {
-    const { event, qrPayload } = item.ticket;
-    return (
-      <View style={styles.body}>
-        <Text style={styles.eyebrow}>Mon ticket</Text>
-        <Text style={styles.title}>{event.title}</Text>
-        <Text style={styles.offer}>
-          {formatFullDate(event.date)} · {event.time}
-        </Text>
-
-        <View style={styles.qrSlot}>
-          <QRCode value={qrPayload} size={220} />
-        </View>
-
-        <Text style={styles.meta}>{event.location} — {event.city}</Text>
-        <Text style={styles.metaSub}>Présente ce QR code à l'entrée. Il est personnel.</Text>
-      </View>
-    );
-  }
-
   const { partner, qrPayload } = item.deal;
 
   return (

@@ -190,7 +190,7 @@ export function PaymentSheet({
                     <Check size={22} color={Colors.accentContrast} strokeWidth={3} />
                   </View>
                   <Text style={styles.successTitle}>Paiement confirmé</Text>
-                  <Text style={styles.successBody}>Ton ticket est dans ton wallet.</Text>
+                  <Text style={styles.successBody}>Ton ticket t'attend sur l'événement.</Text>
                 </View>
               ) : null}
             </GlassPanel>

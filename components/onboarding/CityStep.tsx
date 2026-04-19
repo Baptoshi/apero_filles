@@ -10,7 +10,7 @@ import type { City } from '@/types/user';
 import { ChoiceCard } from './ChoiceCard';
 
 const cities: { value: City; sublabel: string }[] = [
-  { value: 'Lyon', sublabel: 'La ville qui a tout commencé' },
+  { value: 'Lyon', sublabel: 'Entre Rhône, Saône et traboules' },
   { value: 'Marseille', sublabel: 'Soleil, rooftops et bonne humeur' },
   { value: 'Toulouse', sublabel: 'La ville rose' },
   { value: 'Montpellier', sublabel: "Au cœur de l'Hérault" },

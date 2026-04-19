@@ -4,7 +4,7 @@ import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FilleCard } from '@/components/filles/FilleCard';
-import { Header } from '@/components/layout/Header';
+import { PageHero } from '@/components/layout/PageHero';
 import { PillTag } from '@/components/ui/PillTag';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { Colors } from '@/constants/colors';
@@ -69,37 +69,6 @@ export default function FillesScreen() {
 
   return (
     <SafeAreaView edges={['top']} style={styles.screen}>
-      <Header title="Les Filles" subtitle={`${candidates.length} membres autour de toi`} />
-
-      <View style={styles.controls}>
-        <SearchBar
-          value={query}
-          onChange={setQuery}
-          placeholder="Rechercher une fille, une ville..."
-        />
-      </View>
-
-      <View style={styles.cityRow}>
-        {CITY_FILTERS.map((entry) => (
-          <PillTag
-            key={entry}
-            label={entry === 'all' ? 'Toutes' : entry}
-            selected={city === entry}
-            variant="outline"
-            onPress={() => setCity(entry)}
-          />
-        ))}
-      </View>
-
-      {tier === 'free' ? (
-        <View style={styles.lockNote}>
-          <Text style={styles.lockTitle}>Réservé aux membres</Text>
-          <Text style={styles.lockBody}>
-            Tu peux voir l'annuaire, mais les profils détaillés sont réservés aux membres du club.
-          </Text>
-        </View>
-      ) : null}
-
       <FlatList
         data={filtered}
         keyExtractor={keyExtractor}
@@ -107,6 +76,47 @@ export default function FillesScreen() {
         contentContainerStyle={styles.listContent}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         showsVerticalScrollIndicator={false}
+        ListHeaderComponent={
+          <View>
+            <PageHero
+              title={
+                <Text>
+                  Tes <Text style={styles.heroAccent}>rencontres</Text>
+                </Text>
+              }
+            />
+
+            <View style={styles.controls}>
+              <SearchBar
+                value={query}
+                onChange={setQuery}
+                placeholder="Rechercher une fille, une ville..."
+              />
+            </View>
+
+            <View style={styles.cityRow}>
+              {CITY_FILTERS.map((entry) => (
+                <PillTag
+                  key={entry}
+                  label={entry === 'all' ? 'Toutes' : entry}
+                  selected={city === entry}
+                  variant="outline"
+                  onPress={() => setCity(entry)}
+                />
+              ))}
+            </View>
+
+            {tier === 'free' ? (
+              <View style={styles.lockNote}>
+                <Text style={styles.lockTitle}>Réservé aux membres</Text>
+                <Text style={styles.lockBody}>
+                  Tu peux voir l'annuaire, mais les profils détaillés sont réservés aux membres du
+                  club.
+                </Text>
+              </View>
+            ) : null}
+          </View>
+        }
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={styles.emptyTitle}>Aucun résultat</Text>
@@ -125,7 +135,12 @@ const styles = StyleSheet.create({
   },
   controls: {
     paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.xl,
     marginBottom: Spacing.md,
+  },
+  heroAccent: {
+    fontStyle: 'italic',
+    color: Colors.accent,
   },
   cityRow: {
     flexDirection: 'row',

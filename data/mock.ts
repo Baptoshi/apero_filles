@@ -2,7 +2,7 @@ import type { Event } from '@/types/event';
 import type { Partner } from '@/types/partner';
 import type { User } from '@/types/user';
 
-import { EVENT_PHOTOS, USER_PHOTOS } from './photos';
+import { EVENT_PHOTOS, PARTNER_PHOTOS, USER_PHOTOS } from './photos';
 
 /** Base user records without remote photo URLs — enriched below. */
 const baseUsers: User[] = [
@@ -592,21 +592,27 @@ export const mockEvents: Event[] = baseEvents.map((e) => ({
   imageUrl: EVENT_PHOTOS[e.id],
 }));
 
-export const mockPartners: Partner[] = [
+/** Base partner records — enriched with cover photos below. */
+const basePartners: Partner[] = [
   {
     id: 'p1',
     name: 'Café Mokxa',
-    category: 'Café / Brunch',
+    category: 'Café · Brunch',
     offer: '-15% sur la carte',
+    tagline: 'Le café de spécialité qu\'on ne quitte plus le dimanche.',
+    area: 'Lyon 1er',
     city: 'Lyon',
     validUntil: '2026-12-31',
     gradient: 'cream',
+    featured: true,
   },
   {
     id: 'p2',
     name: 'Yoga Village',
     category: 'Bien-être',
     offer: '1 cours offert',
+    tagline: 'Vinyasa, yin, ashtanga — un studio lumineux dans la Croix-Rousse.',
+    area: 'Lyon 4e',
     city: 'Lyon',
     validUntil: '2026-12-31',
     gradient: 'peach',
@@ -614,8 +620,10 @@ export const mockPartners: Partner[] = [
   {
     id: 'p3',
     name: 'Atelier Sézane',
-    category: 'Shopping',
+    category: 'Mode',
     offer: '-10% dès 80€',
+    tagline: 'Les nouveautés en avant-première, avec le café offert.',
+    area: 'Presqu\'île',
     city: 'Lyon',
     validUntil: '2026-12-31',
     gradient: 'rose',
@@ -623,31 +631,112 @@ export const mockPartners: Partner[] = [
   {
     id: 'p4',
     name: 'Le Skybar',
-    category: 'Bar / Apéro',
+    category: 'Bar · Apéro',
     offer: '1 cocktail offert',
+    tagline: 'Vue sur le Vieux-Port au coucher du soleil. Réservation prioritaire.',
+    area: 'Vieux-Port',
     city: 'Marseille',
     validUntil: '2026-09-30',
     gradient: 'sunset',
+    featured: true,
   },
   {
     id: 'p5',
     name: 'La Maison Rose',
     category: 'Restaurant',
     offer: 'Dessert offert',
+    tagline: 'Cuisine du marché, grande tablée rose poudré au cœur du Capitole.',
+    area: 'Capitole',
     city: 'Toulouse',
     validUntil: '2026-12-31',
     gradient: 'blush',
+    featured: true,
   },
   {
     id: 'p6',
     name: 'Le Shake',
-    category: 'Bar à cocktails',
+    category: 'Cocktails',
     offer: '2e cocktail à -50%',
+    tagline: 'La carte signature du barman, dans un speakeasy caché.',
+    area: 'Écusson',
     city: 'Montpellier',
     validUntil: '2026-10-31',
     gradient: 'dusk',
+    featured: true,
+  },
+  {
+    id: 'p7',
+    name: 'Maison Nomad',
+    category: 'Déco · Lifestyle',
+    offer: '-15% sur la nouvelle collection',
+    tagline: 'Céramique, linge lavé et bougies chez notre concept store préféré.',
+    area: 'Pentes',
+    city: 'Lyon',
+    validUntil: '2026-12-31',
+    gradient: 'warm',
+  },
+  {
+    id: 'p8',
+    name: 'Bains du Sud',
+    category: 'Spa · Massage',
+    offer: '30 min offertes',
+    tagline: 'Hammam, soins au rituel — une parenthèse face à la grande bleue.',
+    area: 'Endoume',
+    city: 'Marseille',
+    validUntil: '2026-11-30',
+    gradient: 'sunset',
+  },
+  {
+    id: 'p9',
+    name: 'Studio Flore',
+    category: 'Atelier floral',
+    offer: 'Atelier à -20%',
+    tagline: 'Créations saisonnières avec les fleurs du marché Victor-Hugo.',
+    area: 'Saint-Aubin',
+    city: 'Toulouse',
+    validUntil: '2026-10-31',
+    gradient: 'rose',
+  },
+  {
+    id: 'p10',
+    name: 'Librairie Le Bal',
+    category: 'Librairie',
+    offer: '-10% + café offert',
+    tagline: 'Une sélection indépendante, feuilletée au comptoir.',
+    area: 'Thabor',
+    city: 'Rennes',
+    validUntil: '2026-12-31',
+    gradient: 'cream',
+    featured: true,
+  },
+  {
+    id: 'p11',
+    name: 'Atelier Céramique',
+    category: 'Atelier créatif',
+    offer: '1 séance offerte',
+    tagline: 'Tournage et émaillage entre filles, thé à volonté.',
+    area: 'Antigone',
+    city: 'Montpellier',
+    validUntil: '2026-12-31',
+    gradient: 'peach',
+  },
+  {
+    id: 'p12',
+    name: 'Café Albertine',
+    category: 'Café · Pâtisserie',
+    offer: 'Pâtisserie offerte',
+    tagline: 'Viennoiseries maison et grande table en bois clair.',
+    area: 'Saint-Michel',
+    city: 'Rennes',
+    validUntil: '2026-12-31',
+    gradient: 'blush',
   },
 ];
+
+export const mockPartners: Partner[] = basePartners.map((p) => ({
+  ...p,
+  imageUrl: PARTNER_PHOTOS[p.id],
+}));
 
 // Utilisatrice "courante" de l'app (mock)
 export const currentUserId = 'u1';
