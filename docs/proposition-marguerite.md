@@ -529,7 +529,8 @@ Un vrai système d'auth production-ready, pas un formulaire basique.
 
 ### 7.4 Stripe (paiements)
 
-- **Stripe Subscriptions** pour l'abonnement mensuel (9,99 €).
+- **Stripe Subscriptions** pour les trois formules d'abonnement
+  (L'Étincelle / Le Lien / La Bande — voir § 3 bis pour les tarifs).
 - **Stripe Checkout** pour les tickets à l'unité.
 - **Stripe Customer Portal** pour que la fille puisse gérer sa carte, son
   historique, résilier seule.

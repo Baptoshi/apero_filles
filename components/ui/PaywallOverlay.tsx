@@ -40,7 +40,7 @@ export function PaywallOverlay({
       <View style={styles.content} pointerEvents="none">
         {children}
       </View>
-      <View style={styles.wash} />
+      <View style={styles.wash} pointerEvents="none" />
       <Pressable
         onPress={onPress}
         accessibilityRole="button"
@@ -66,7 +66,15 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     backgroundColor: Colors.surfaceMuted,
   },
+  /**
+   * Absolute-fill the background content and centre it both axes so the
+   * blurred preview sits concentrically behind the locked CTA instead of
+   * clumping in the top-left corner.
+   */
   content: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
     opacity: 0.35,
   },
   wash: {

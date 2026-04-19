@@ -29,7 +29,7 @@ export function ClubUpsellCard({ onPress, style }: ClubUpsellCardProps) {
       <Text style={styles.title}>
         Prix réduits, <Text style={styles.titleAccent}>bons plans</Text>, annuaire.
       </Text>
-      <Text style={styles.body}>À partir de 9,99€/mois · sans engagement.</Text>
+      <Text style={styles.body}>À partir de 12,50 €/mois · trois formules.</Text>
 
       <View style={styles.ctaRow}>
         <Text style={styles.ctaLabel}>Découvrir les formules</Text>
