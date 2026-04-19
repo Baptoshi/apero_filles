@@ -4,7 +4,7 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FeedCard } from '@/components/events/FeedCard';
-import { Header } from '@/components/layout/Header';
+import { CityPicker } from '@/components/ui/CityPicker';
 import { PillTag } from '@/components/ui/PillTag';
 import { SearchBar } from '@/components/ui/SearchBar';
 import {
@@ -14,29 +14,24 @@ import {
 } from '@/constants/categories';
 import { Colors } from '@/constants/colors';
 import { Spacing } from '@/constants/spacing';
-import { Typography } from '@/constants/typography';
+import { FontFamily, Typography } from '@/constants/typography';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useEventsStore } from '@/stores/useEventsStore';
 import type { Event } from '@/types/event';
 import type { City } from '@/types/user';
 import { isUpcoming } from '@/utils/date';
 
-const CITIES: readonly (City | 'all')[] = [
-  'all',
-  'Lyon',
-  'Marseille',
-  'Toulouse',
-  'Montpellier',
-  'Rennes',
-];
-
 /**
- * Discover — search + filters, then a vertical feed of `FeedCard`s to stay
- * consistent with the Home feed. No colored banners or icon chips.
+ * Discover — editorial title with an interactive city accent.
+ *
+ * The page filters the feed to the currently-selected city (persisted on the
+ * user profile) and exposes category pills. The city name inside the title
+ * is tappable and opens a small bottom-sheet picker.
  */
 export default function DiscoverScreen() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
+  const setCity = useAuthStore((s) => s.setCity);
   const tier = useAuthStore((s) => s.tier);
   const events = useEventsStore((s) => s.events);
   const bookmarks = useEventsStore((s) => s.bookmarks);
@@ -44,14 +39,16 @@ export default function DiscoverScreen() {
 
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<CategoryFilter>('all');
-  const [city, setCity] = useState<City | 'all'>(user?.city ?? 'all');
+  const [cityPickerOpen, setCityPickerOpen] = useState(false);
+
+  const city: City = user?.city ?? 'Lyon';
 
   const filtered = useMemo(() => {
     const q = query.trim().toLocaleLowerCase();
     return events
       .filter((event) => isUpcoming(event.date))
       .filter((event) => (category === 'all' ? true : event.category === category))
-      .filter((event) => (city === 'all' ? true : event.city === city))
+      .filter((event) => event.city === city)
       .filter((event) => {
         if (!q) return true;
         return (
@@ -96,7 +93,23 @@ export default function DiscoverScreen() {
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View>
-            <Header title="Découvrir" subtitle="Les événements à venir" />
+            <View style={styles.titleWrap}>
+              <Text style={styles.title}>
+                Découvrir à{' '}
+                <Pressable
+                  onPress={() => setCityPickerOpen(true)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Changer de ville — actuellement ${city}`}
+                >
+                  {({ pressed }) => (
+                    <Text style={[styles.cityAccent, pressed && styles.cityPressed]}>
+                      {city}
+                      <Text style={styles.cityChevron}> ⌄</Text>
+                    </Text>
+                  )}
+                </Pressable>
+              </Text>
+            </View>
 
             <View style={styles.controls}>
               <SearchBar
@@ -122,18 +135,6 @@ export default function DiscoverScreen() {
               )}
               style={styles.filterRow}
             />
-
-            <View style={styles.citiesRow}>
-              {CITIES.map((entry) => (
-                <PillTag
-                  key={entry}
-                  label={entry === 'all' ? 'Toutes les villes' : entry}
-                  selected={city === entry}
-                  variant="outline"
-                  onPress={() => setCity(entry)}
-                />
-              ))}
-            </View>
 
             {tier === 'free' ? (
               <Pressable
@@ -161,6 +162,13 @@ export default function DiscoverScreen() {
           </View>
         }
       />
+
+      <CityPicker
+        visible={cityPickerOpen}
+        selected={city}
+        onClose={() => setCityPickerOpen(false)}
+        onSelect={setCity}
+      />
     </SafeAreaView>
   );
 }
@@ -173,6 +181,34 @@ const styles = StyleSheet.create({
   listContent: {
     paddingBottom: Spacing.xxxl * 3,
   },
+  titleWrap: {
+    paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.lg,
+  },
+  title: {
+    fontFamily: FontFamily.display,
+    fontSize: 40,
+    lineHeight: 46,
+    color: Colors.text,
+    letterSpacing: -0.5,
+  },
+  cityAccent: {
+    fontFamily: FontFamily.display,
+    fontSize: 40,
+    lineHeight: 46,
+    color: Colors.accent,
+    fontStyle: 'italic',
+    letterSpacing: -0.5,
+  },
+  cityChevron: {
+    fontFamily: FontFamily.semiBold,
+    color: Colors.accent,
+    fontSize: 28,
+  },
+  cityPressed: {
+    opacity: 0.6,
+  },
   cardWrap: {
     paddingHorizontal: Spacing.xl,
   },
@@ -184,20 +220,13 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   filterRow: {
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.xl,
   },
   filterList: {
     paddingHorizontal: Spacing.xl,
   },
   filterSeparator: {
     width: Spacing.sm,
-  },
-  citiesRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.sm,
-    paddingHorizontal: Spacing.xl,
-    marginBottom: Spacing.xl,
   },
   upsell: {
     marginHorizontal: Spacing.xl,

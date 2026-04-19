@@ -49,4 +49,8 @@ export const EVENT_PHOTOS: Record<string, string> = {
   e10: unsplash('1543007630-9710e4a00a20', 900), // pub
   e11: unsplash('1551024601-bec78aea704b', 900), // cocktail making
   e12: unsplash('1551632811-561732d1e306', 900), // hiking
+  // Past events
+  e13: unsplash('1595425964377-c7f36cee02f8', 900), // perfume atelier
+  e14: unsplash('1545205597-3d9d02c29597', 900), // yoga rooftop
+  e15: unsplash('1414235077428-338989a2e8c0', 900), // apéro new year
 };

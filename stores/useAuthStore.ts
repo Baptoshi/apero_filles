@@ -30,6 +30,9 @@ interface AuthState {
   // Tier (dev toggle + subscription)
   setTier: (tier: MembershipTier) => void;
   cycleTier: () => void;
+
+  // Preference
+  setCity: (city: City) => void;
 }
 
 const emptyDraft: OnboardingDraft = {
@@ -105,4 +108,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const next = tierCycle[(idx + 1) % tierCycle.length] ?? 'free';
     set({ tier: next });
   },
+
+  setCity: (city) =>
+    set((state) => (state.user ? { user: { ...state.user, city } } : state)),
 }));
